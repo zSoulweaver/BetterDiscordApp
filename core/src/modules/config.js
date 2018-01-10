@@ -8,11 +8,9 @@
  * LICENSE file in the root directory of this source tree. 
 */
 
-class Config {
+const { Module } = require('./modulebase');
 
-    constructor(args) {
-        this.args = args;
-    }
+class Config extends Module {
 
     get version() {
         return this.args.version;

@@ -16,7 +16,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
  * DEVELOPMENT VARIABLES
  */
 const __DEV = {
-    TESTING: true,
+    TESTING: false,
     clietScriptPath: "G:/Github/JsSucks/BetterDiscordApp/client/dist/betterdiscord.client.js"
 };
 
@@ -73,6 +73,13 @@ class BetterDiscord {
         return _asyncToGenerator(function* () {
             const window = yield _this.waitForWindow();
             _this.windowUtils = new WindowUtils({ window });
+
+            _this.windowUtils.webContents.on('did-finish-load', function (e) {
+                if (__DEV) {
+                    _this.windowUtils.injectScript(__DEV.clietScriptPath);
+                }
+            });
+
             setTimeout(function () {
                 if (__DEV) {
                     _this.windowUtils.injectScript(__DEV.clietScriptPath);
@@ -90,11 +97,14 @@ class BetterDiscord {
                         resolve(windows[0]);
                         clearInterval(defer);
                         return;
-                    } else if (false) {
-                        //TODO Check for Discord loading finished
+                    }
+                    //TODO Check for Discord loading finished
+                    if (windows.length === 1 && windows[0].webContents.getURL().includes("discordapp.com")) {
                         resolve(windows[0]);
                         clearInterval(defer);
                     }
+                    //resolve(windows[0]);
+                    //clearInterval(defer);
                 }, 100);
             });
         })();

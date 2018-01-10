@@ -13,8 +13,8 @@
  * DEVELOPMENT VARIABLES
  */
 const __DEV = {
-    TESTING: true,
-    clietScriptPath: "G:/Github/JsSucks/BetterDiscordApp/client/dist/betterdiscord.client.js"
+    TESTING: false,
+    clientScriptPath: "G:/Github/JsSucks/BetterDiscordApp/client/dist/betterdiscord.client.js"
 }
 
 const { Utils, FileUtils, BDIpc, Config, WindowUtils } = require('./modules');
@@ -61,6 +61,7 @@ class Comms {
 class BetterDiscord {
 
     constructor(args) {
+        this.injectScripts = this.injectScripts.bind(this);
         Common.Config = new Config(args || dummyArgs);
         this.comms = new Comms();
         this.init();
@@ -69,9 +70,12 @@ class BetterDiscord {
     async init() {
         const window = await this.waitForWindow();
         this.windowUtils = new WindowUtils({ window });
+
+        this.windowUtils.webContents.on('did-finish-load', e => this.injectScripts(true));
+
         setTimeout(() => {
             if (__DEV) {
-                this.windowUtils.injectScript(__DEV.clietScriptPath);
+                this.ínjectScripts();
             }
         }, 500);
     }
@@ -84,12 +88,20 @@ class BetterDiscord {
                     resolve(windows[0]);
                     clearInterval(defer);
                     return;
-                }else if (false) { //TODO Check for Discord loading finished
+                }
+
+                if (windows.length === 1 && windows[0].webContents.getURL().includes("discordapp.com")) {
                     resolve(windows[0]);
                     clearInterval(defer);
                 }
             }, 100);
         });
+    }
+
+    injectScripts(reload) {
+        if (__DEV) {
+            this.windowUtils.injectScript(__DEV.clientScriptPath);
+        }
     }
 
     get fileUtils() { return FileUtils; }

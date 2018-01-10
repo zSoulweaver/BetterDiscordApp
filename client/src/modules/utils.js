@@ -12,8 +12,25 @@ const { Module } = require('./modulebase');
 
 class Logger {
 
-    static log(message) {
-        console.log(`[BetterDiscord] ${message}`);
+    static log(module, message, level = 'log') {
+        level = this.parseLevel(level);
+        console[level]('[%cBetter%cDiscord:%s] %s', 'color: #3E82E5', '', `${module}${level === 'debug' ? '|DBG' : ''}`, message);
+    }
+
+    static get levels() {
+        return {
+            'log': 'log',
+            'warn': 'warn',
+            'err': 'error',
+            'error': 'error',
+            'debug': 'debug',
+            'dbg': 'debug',
+            'info': 'info'
+        };
+    }
+
+    static parseLevel(level) {
+        return this.levels.hasOwnProperty(level) ? this.levels[level] : 'log';
     }
 
 }

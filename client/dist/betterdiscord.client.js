@@ -88,11 +88,14 @@ var _require = __webpack_require__(1),
 var BetterDiscord = function BetterDiscord() {
     _classCallCheck(this, BetterDiscord);
 
-    Logger.log("Init");
+    Logger.log('main', 'Init', 'log');
+    Logger.log('warn', 'Init', 'warn');
+    Logger.log('info', 'Init', 'info');
+    Logger.log('err', 'Init', 'err');
 };
 
 if (window.BetterDiscord) {
-    console.log("Attepting to inject again?");
+    Logger.log('main', 'Attepting to inject again?');
 } else {
     var bdInstance = new BetterDiscord();
     window.BetterDiscord = {};
@@ -149,8 +152,29 @@ var Logger = function () {
 
     _createClass(Logger, null, [{
         key: 'log',
-        value: function log(message) {
-            console.log('[BetterDiscord] ' + message);
+        value: function log(module, message) {
+            var level = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'log';
+
+            level = this.parseLevel(level);
+            console[level]('[%cBetter%cDiscord:%s] %s', 'color: #3E82E5', '', '' + module + (level === 'debug' ? '|DBG' : ''), message);
+        }
+    }, {
+        key: 'parseLevel',
+        value: function parseLevel(level) {
+            return this.levels.hasOwnProperty(level) ? this.levels[level] : 'log';
+        }
+    }, {
+        key: 'levels',
+        get: function get() {
+            return {
+                'log': 'log',
+                'warn': 'warn',
+                'err': 'error',
+                'error': 'error',
+                'debug': 'debug',
+                'dbg': 'debug',
+                'info': 'info'
+            };
         }
     }]);
 

@@ -15,13 +15,13 @@ const { Logger } = require('./modules');
 class BetterDiscord {
 
     constructor() {
-        Logger.log("Init");
+        Logger.log('main', 'Init');
     }
 
 }
 
 if (window.BetterDiscord) {
-    console.log("Attepting to inject again?");
+    Logger.log('main', 'Attepting to inject again?');
 } else {
     let bdInstance = new BetterDiscord();
     window.BetterDiscord = {};

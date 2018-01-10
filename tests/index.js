@@ -1,5 +1,5 @@
 const { app, BrowserWindow } = require('electron');
-const { BetterDiscord } = require('../dist/main');
+const { BetterDiscord } = require('../core/dist/main.js');
 const path = require('path');
 const url = require('url');
 

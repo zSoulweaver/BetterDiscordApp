@@ -87,6 +87,8 @@ var _require = __webpack_require__(1),
 
 var BetterDiscord = function BetterDiscord() {
     _classCallCheck(this, BetterDiscord);
+
+    Logger.log("Hi!");
 };
 
 var bdInstance = new BetterDiscord();

@@ -9,12 +9,17 @@
 */
 
 const { Module } = require('./modulebase');
+const moment = require('moment');
+
+const logs = [];
 
 class Logger {
 
     static log(module, message, level = 'log') {
         level = this.parseLevel(level);
         console[level]('[%cBetter%cDiscord:%s] %s', 'color: #3E82E5', '', `${module}${level === 'debug' ? '|DBG' : ''}`, message);
+        logs.push(`[${moment().format('DD/MM/YY hh:mm:ss')}|${module}|${level}] ${message}`);
+        window.bdlogs = logs;
     }
 
     static get levels() {

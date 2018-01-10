@@ -12,6 +12,7 @@
 
 const { Logger } = require('./modules');
 
+
 class BetterDiscord {
 
     constructor() {
@@ -24,5 +25,11 @@ if (window.BetterDiscord) {
     Logger.log('main', 'Attepting to inject again?');
 } else {
     let bdInstance = new BetterDiscord();
-    window.BetterDiscord = {};
+    window.BetterDiscord = {
+        'vendor': {
+            jQuery: require('jquery'),
+            $: require('jquery'),
+            moment: require('moment')
+        }
+    };
 }

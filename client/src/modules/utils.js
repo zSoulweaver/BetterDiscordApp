@@ -13,7 +13,7 @@ const { Module } = require('./modulebase');
 class Logger {
 
     static log(message) {
-        console.log(message);
+        console.log(`[BetterDiscord] ${message}`);
     }
 
 }

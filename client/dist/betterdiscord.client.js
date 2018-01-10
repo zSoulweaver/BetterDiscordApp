@@ -88,10 +88,15 @@ var _require = __webpack_require__(1),
 var BetterDiscord = function BetterDiscord() {
     _classCallCheck(this, BetterDiscord);
 
-    Logger.log("Test Log");
+    Logger.log("Init");
 };
 
-var bdInstance = new BetterDiscord();
+if (window.BetterDiscord) {
+    console.log("Attepting to inject again?");
+} else {
+    var bdInstance = new BetterDiscord();
+    window.BetterDiscord = {};
+}
 
 /***/ }),
 /* 1 */
@@ -145,7 +150,7 @@ var Logger = function () {
     _createClass(Logger, null, [{
         key: 'log',
         value: function log(message) {
-            console.log(message);
+            console.log('[BetterDiscord] ' + message);
         }
     }]);
 

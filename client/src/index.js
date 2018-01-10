@@ -15,9 +15,14 @@ const { Logger } = require('./modules');
 class BetterDiscord {
 
     constructor() {
-        Logger.log("Test Log");
+        Logger.log("Init");
     }
 
 }
 
-let bdInstance = new BetterDiscord();
+if (window.BetterDiscord) {
+    console.log("Attepting to inject again?");
+} else {
+    let bdInstance = new BetterDiscord();
+    window.BetterDiscord = {};
+}

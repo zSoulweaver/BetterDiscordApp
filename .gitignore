@@ -19,3 +19,4 @@ v2/lib/static.js
 Installers/**/*/bin
 Installers/**/*/obj
 Installers/**/*/packages
+.vs

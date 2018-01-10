@@ -1,0 +1,26 @@
+{
+  "name": "bdcore",
+  "description": "BetterDiscord core package",
+  "author": "Jiiks",
+  "version": "0.4.0",
+  "homepage": "https://betterdiscord.net",
+  "license": "MIT",
+  "main": "index.js",
+  "contributors": [
+    "Jiiks",
+    "Pohky"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jiiks/BetterDiscordApp.git"
+  },
+  "private": false,
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "electron": "^1.7.10",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^7.0.0",
+    "pump": "^2.0.0"
+  }
+}

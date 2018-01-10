@@ -6,10 +6,9 @@ const url = require('url');
 const config = require('./config.json');
 
 let bw;
-
-const bd = new BetterDiscord(config);
-
+const bd = new BetterDiscord(Object.assign(config));
 app.on('ready', () => {
+
     bw = new BrowserWindow({ width: 1920, height: 1080 });
     bw.webContents.openDevTools();
     bw.loadURL(url.format({
@@ -18,4 +17,5 @@ app.on('ready', () => {
         slashes: true
     }));
     bw.on('closed', () => app.quit());
+
 });

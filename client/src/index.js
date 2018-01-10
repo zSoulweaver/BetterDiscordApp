@@ -15,7 +15,7 @@ const { Logger } = require('./modules');
 class BetterDiscord {
 
     constructor() {
-        Logger.log("Hi!");
+        Logger.log("Test Log");
     }
 
 }

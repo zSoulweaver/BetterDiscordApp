@@ -12,6 +12,8 @@ const
     path = require('path'),
     fs = require('fs');
 
+const { Module } = require('./modulebase');
+
 class Utils {
 
     static async tryParseJson(jsonString) {
@@ -105,7 +107,40 @@ class FileUtils {
     }
 }
 
+class WindowUtils extends Module {
+
+    bindings() {
+        this.openDevTools = this.openDevTools.bind(this);
+        this.executeJavascript = this.executeJavascript.bind(this);
+        this.injectScript = this.injectScript.bind(this);
+    }
+
+    get window() {
+        return this.state.window;
+    }
+
+    get webContents() {
+        return this.window.webContents;
+    }
+
+    openDevTools() {
+        this.webContents.openDevTools();
+    }
+
+    executeJavascript(script) {
+        this.webContents.executeJavaScript(script);
+    }
+
+    injectScript(fpath, variable) {
+        console.log(`Injecting: ${fpath}`);
+        if (variable) this.executeJavascript(`${variable} = require("${fpath}");`);
+        else this.executeJavascript(`require("${fpath}");`);
+    }
+    
+}
+
 module.exports = {
     Utils,
-    FileUtils
+    FileUtils,
+    WindowUtils
 }

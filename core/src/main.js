@@ -8,7 +8,17 @@
  * LICENSE file in the root directory of this source tree. 
 */
 
-const { Utils, FileUtils, BDIpc, Config } = require('./modules');
+
+/**
+ * DEVELOPMENT VARIABLES
+ */
+const __DEV = {
+    TESTING: true,
+    clietScriptPath: "G:/Github/JsSucks/BetterDiscordApp/client/dist/betterdiscord.client.js"
+}
+
+const { Utils, FileUtils, BDIpc, Config, WindowUtils } = require('./modules');
+const { BrowserWindow } = require('electron');
 
 const Common = {};
 
@@ -53,6 +63,33 @@ class BetterDiscord {
     constructor(args) {
         Common.Config = new Config(args || dummyArgs);
         this.comms = new Comms();
+        this.init();
+    }
+
+    async init() {
+        const window = await this.waitForWindow();
+        this.windowUtils = new WindowUtils({ window });
+        setTimeout(() => {
+            if (__DEV) {
+                this.windowUtils.injectScript(__DEV.clietScriptPath);
+            }
+        }, 500);
+    }
+
+    async waitForWindow() {
+        return new Promise((resolve, reject) => {
+            const defer = setInterval(() => {
+                const windows = BrowserWindow.getAllWindows();
+                if (__DEV && __DEV.TESTING && windows.length > 0) {
+                    resolve(windows[0]);
+                    clearInterval(defer);
+                    return;
+                }else if (false) { //TODO Check for Discord loading finished
+                    resolve(windows[0]);
+                    clearInterval(defer);
+                }
+            }, 100);
+        });
     }
 
     get fileUtils() { return FileUtils; }

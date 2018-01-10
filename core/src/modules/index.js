@@ -1,3 +1,3 @@
 export { BDIpc } from './bdipc';
-export { Utils, FileUtils } from './utils';
+export { Utils, FileUtils, WindowUtils } from './utils';
 export { Config } from './config';

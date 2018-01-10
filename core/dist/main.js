@@ -12,7 +12,16 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
  * LICENSE file in the root directory of this source tree. 
 */
 
-const { Utils, FileUtils, BDIpc, Config } = require('./modules');
+/**
+ * DEVELOPMENT VARIABLES
+ */
+const __DEV = {
+    TESTING: true,
+    clietScriptPath: "G:/Github/JsSucks/BetterDiscordApp/client/dist/betterdiscord.client.js"
+};
+
+const { Utils, FileUtils, BDIpc, Config, WindowUtils } = require('./modules');
+const { BrowserWindow } = require('electron');
 
 const Common = {};
 
@@ -55,6 +64,40 @@ class BetterDiscord {
     constructor(args) {
         Common.Config = new Config(args || dummyArgs);
         this.comms = new Comms();
+        this.init();
+    }
+
+    init() {
+        var _this = this;
+
+        return _asyncToGenerator(function* () {
+            const window = yield _this.waitForWindow();
+            _this.windowUtils = new WindowUtils({ window });
+            setTimeout(function () {
+                if (__DEV) {
+                    _this.windowUtils.injectScript(__DEV.clietScriptPath);
+                }
+            }, 500);
+        })();
+    }
+
+    waitForWindow() {
+        return _asyncToGenerator(function* () {
+            return new Promise(function (resolve, reject) {
+                const defer = setInterval(function () {
+                    const windows = BrowserWindow.getAllWindows();
+                    if (__DEV && __DEV.TESTING && windows.length > 0) {
+                        resolve(windows[0]);
+                        clearInterval(defer);
+                        return;
+                    } else if (false) {
+                        //TODO Check for Discord loading finished
+                        resolve(windows[0]);
+                        clearInterval(defer);
+                    }
+                }, 100);
+            });
+        })();
     }
 
     get fileUtils() {

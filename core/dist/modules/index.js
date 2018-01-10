@@ -27,6 +27,12 @@ Object.defineProperty(exports, 'FileUtils', {
     return _utils.FileUtils;
   }
 });
+Object.defineProperty(exports, 'WindowUtils', {
+  enumerable: true,
+  get: function () {
+    return _utils.WindowUtils;
+  }
+});
 
 var _config = require('./config');
 

@@ -73,8 +73,6 @@ class BetterDiscord {
         Common.Config = new Config(args || dummyArgs);
         this.comms = new Comms();
         this.init();
-        console.log("PLUGINS PATH:");
-        console.log(dummyArgs.paths.plugins);
     }
 
     init() {

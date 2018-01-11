@@ -17,8 +17,13 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
  */
 const __DEV = {
     TESTING: false,
-    clietScriptPath: "G:/Github/JsSucks/BetterDiscordApp/client/dist/betterdiscord.client.js"
+    clientScriptPath: 'G:/Github/JsSucks/BetterDiscordApp/client/dist/betterdiscord.client.js'
 };
+
+const path = require('path');
+
+const __pluginPath = path.resolve(__dirname, '..', '..', 'tests', 'plugins');
+const __themePath = path.resolve(__dirname, '..', '..', 'tests', 'themes');
 
 const { Utils, FileUtils, BDIpc, Config, WindowUtils } = require('./modules');
 const { BrowserWindow } = require('electron');
@@ -27,8 +32,10 @@ const Common = {};
 
 const dummyArgs = {
     'version': '0.3.1',
-    'paths': [{ 'base': 'basePath' }, { 'plugins': 'pluginsPath' }, { 'themes': 'themesPath' }]
+    'paths': [{ 'base': 'basePath' }, { 'plugins': __pluginPath }, { 'themes': __themePath }]
 };
+
+console.log(dummyArgs);
 
 class Comms {
 
@@ -62,9 +69,12 @@ class Comms {
 class BetterDiscord {
 
     constructor(args) {
+        this.injectScripts = this.injectScripts.bind(this);
         Common.Config = new Config(args || dummyArgs);
         this.comms = new Comms();
         this.init();
+        console.log("PLUGINS PATH:");
+        console.log(dummyArgs.paths.plugins);
     }
 
     init() {
@@ -75,14 +85,12 @@ class BetterDiscord {
             _this.windowUtils = new WindowUtils({ window });
 
             _this.windowUtils.webContents.on('did-finish-load', function (e) {
-                if (__DEV) {
-                    _this.windowUtils.injectScript(__DEV.clietScriptPath);
-                }
+                return _this.injectScripts(true);
             });
 
             setTimeout(function () {
                 if (__DEV) {
-                    _this.windowUtils.injectScript(__DEV.clietScriptPath);
+                    _this.injectScripts();
                 }
             }, 500);
         })();
@@ -98,16 +106,20 @@ class BetterDiscord {
                         clearInterval(defer);
                         return;
                     }
-                    //TODO Check for Discord loading finished
+
                     if (windows.length === 1 && windows[0].webContents.getURL().includes("discordapp.com")) {
                         resolve(windows[0]);
                         clearInterval(defer);
                     }
-                    //resolve(windows[0]);
-                    //clearInterval(defer);
                 }, 100);
             });
         })();
+    }
+
+    injectScripts(reload = false) {
+        if (__DEV) {
+            this.windowUtils.injectScript(__DEV.clientScriptPath);
+        }
     }
 
     get fileUtils() {

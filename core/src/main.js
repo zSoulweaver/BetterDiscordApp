@@ -14,8 +14,13 @@
  */
 const __DEV = {
     TESTING: false,
-    clientScriptPath: "G:/Github/JsSucks/BetterDiscordApp/client/dist/betterdiscord.client.js"
+    clientScriptPath: 'G:/Github/JsSucks/BetterDiscordApp/client/dist/betterdiscord.client.js'
 }
+
+const path = require('path');
+
+const __pluginPath = path.resolve(__dirname, '..', '..', 'tests', 'plugins');
+const __themePath = path.resolve(__dirname, '..', '..', 'tests', 'themes');
 
 const { Utils, FileUtils, BDIpc, Config, WindowUtils } = require('./modules');
 const { BrowserWindow } = require('electron');
@@ -26,10 +31,13 @@ const dummyArgs = {
     'version': '0.3.1',
     'paths': [
         { 'base': 'basePath' },
-        { 'plugins': 'pluginsPath' },
-        { 'themes': 'themesPath' }
+        { 'plugins': __pluginPath },
+        { 'themes': __themePath }
     ]
 };
+
+console.log(dummyArgs);
+
 
 class Comms {
 
@@ -65,6 +73,8 @@ class BetterDiscord {
         Common.Config = new Config(args || dummyArgs);
         this.comms = new Comms();
         this.init();
+        console.log("PLUGINS PATH:");
+        console.log(dummyArgs.paths.plugins);
     }
 
     async init() {
@@ -75,7 +85,7 @@ class BetterDiscord {
 
         setTimeout(() => {
             if (__DEV) {
-                this.ínjectScripts();
+                this.injectScripts();
             }
         }, 500);
     }
@@ -98,7 +108,7 @@ class BetterDiscord {
         });
     }
 
-    injectScripts(reload) {
+    injectScripts(reload = false) {
         if (__DEV) {
             this.windowUtils.injectScript(__DEV.clientScriptPath);
         }

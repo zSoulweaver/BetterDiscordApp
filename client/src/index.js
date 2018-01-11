@@ -22,7 +22,7 @@ class BetterDiscord {
 }
 
 if (window.BetterDiscord) {
-    Logger.log('main', 'Attepting to inject again?');
+    Logger.log('main', 'Attempting to inject again?');
 } else {
     let bdInstance = new BetterDiscord();
     window.BetterDiscord = {

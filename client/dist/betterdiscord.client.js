@@ -26595,7 +26595,9 @@ return jQuery;
 
 
 
-const { Logger, PluginManager } = __webpack_require__(123);
+const { Logger, PluginManager, BDIpc } = __webpack_require__(123);
+
+window.bdipc = BDIpc;
 
 class BetterDiscord {
 
@@ -26634,6 +26636,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__plugin__ = __webpack_require__(128);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__plugin___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__plugin__);
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_2__plugin__, "Pluging")) __webpack_require__.d(__webpack_exports__, "Pluging", function() { return __WEBPACK_IMPORTED_MODULE_2__plugin__["Pluging"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__bdipc__ = __webpack_require__(129);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__bdipc___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__bdipc__);
+/* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_3__bdipc__, "BDIpc")) __webpack_require__.d(__webpack_exports__, "BDIpc", function() { return __WEBPACK_IMPORTED_MODULE_3__bdipc__["BDIpc"]; });
+
 
 
 
@@ -27011,8 +27017,11 @@ class PluginManager extends Module {
     }
 
     getPluginByName(name) {
-        const { plugins } = this;
-        return plugins.find(plugin => plugin.name === name);
+        return this.plugins.find(plugin => plugin.name === name);
+    }
+
+    getPluginById(id) {
+        return this.plugins.find(plugin => plugin.id === id);
     }
 
 }
@@ -27042,6 +27051,43 @@ class Plugin {
 }
 
 module.exports = { Plugin };
+
+/***/ }),
+/* 129 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/**
+ * BetterDiscord Client IPC Module
+ * Copyright (c) 2015-present JsSucks - https://github.com/JsSucks
+ * All rights reserved.
+ * https://github.com/JsSucks - https://betterdiscord.net
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree. 
+*/
+
+const { ipcRenderer } = __webpack_require__(130);
+
+class BDIpc {
+
+    static async send(channel, message) {
+        channel = channel.startsWith('bd-') ? channel : `bd-${channel}`;
+        const __eid = Date.now().toString();
+        ipcRenderer.send(channel, Object.assign(message ? message : {}, { __eid }));
+        return new Promise((resolve, reject) => {
+            ipcRenderer.once(__eid, (event, arg) => resolve(arg));
+        });
+    }
+
+}
+
+module.exports = { BDIpc };
+
+/***/ }),
+/* 130 */
+/***/ (function(module, exports) {
+
+module.exports = window.require("electron");
 
 /***/ })
 /******/ ]);

@@ -20,6 +20,9 @@ module.exports = {
     module: {
         loaders: [jsLoader]
     },
+    externals: {
+        'electron': 'window.require("electron")'
+    }
    /* resolve: {
         alias: {
             'momentjs': 'vendor/moment.min.js'

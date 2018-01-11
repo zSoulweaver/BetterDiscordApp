@@ -10,8 +10,7 @@
 
 'use strict';
 
-const { Logger, PluginManager } = require('./modules');
-
+const { Logger, PluginManager, BDIpc } = require('./modules');
 
 class BetterDiscord {
 

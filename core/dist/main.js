@@ -17,11 +17,14 @@ const path = require('path');
 /**
  * DEVELOPMENT VARIABLES
  */
-const clientScriptPath = path.resolve(__dirname, '..', '..', 'client', 'dist');
+const clientScriptPath = path.resolve(__dirname, '..', '..', 'client', 'dist').replace(/\\/g, '/');
+
 const __DEV = {
     TESTING: false,
     clientScriptPath: `${clientScriptPath}/betterdiscord.client.js`
 };
+
+console.log(__DEV);
 
 const __pluginPath = path.resolve(__dirname, '..', '..', 'tests', 'plugins');
 const __themePath = path.resolve(__dirname, '..', '..', 'tests', 'themes');

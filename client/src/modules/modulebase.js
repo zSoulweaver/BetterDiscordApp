@@ -27,6 +27,12 @@ class Module {
         if (this.setInitialState) this.setInitialState(this.state);
     }
 
+    setState(newState) {
+        const oldState = this.state;
+        Object.assign(this.state, newState);
+        if (this.stateChanged) this.stateChanged(oldState, newState);
+    }
+
     set args(t) { }
     get args() { return this.__.args; }
     get state() { return this.__.state; }

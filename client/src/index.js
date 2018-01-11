@@ -10,13 +10,14 @@
 
 'use strict';
 
-const { Logger } = require('./modules');
+const { Logger, PluginManager } = require('./modules');
 
 
 class BetterDiscord {
 
     constructor() {
         Logger.log('main', 'Init');
+        window.pm = PluginManager;
     }
 
 }

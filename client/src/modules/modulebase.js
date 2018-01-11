@@ -16,9 +16,10 @@ class Module {
 
     constructor(args) {
         this.__ = {
-            state: args,
+            state: args || {},
             args
         }
+        this.setState = this.setState.bind(this);
         this.init();
     }
 

@@ -14,7 +14,7 @@ class PluginManager extends Module {
     
     setInitialState() {
         this.setState({
-            plugins: {}
+            plugins: []
         });
     }
 
@@ -22,6 +22,24 @@ class PluginManager extends Module {
         return this.state.plugins;
     }
 
+    loadPlugin(plugin) {
+        const { plugins } = this;
+        plugins.push(plugin);
+        this.setState({
+            plugins
+        });
+    }
+
+    getPluginByName(name) {
+        return this.plugins.find(plugin => plugin.name === name);
+    }
+
+    getPluginById(id) {
+        return this.plugins.find(plugin => plugin.id === id);
+    }
+
 }
 
-module.exports = { PluginManager }
+const _instance = new PluginManager();
+
+module.exports = { PluginManager: _instance }

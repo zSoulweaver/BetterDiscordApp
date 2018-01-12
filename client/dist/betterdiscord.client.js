@@ -27195,7 +27195,6 @@ class Global {
 
     first() {
         if (window.__bd) {
-            window.tt = window.__bd;
             this.__globals = window.__bd;
             window.__bd = {
                 setWS: this.setWS
@@ -27204,8 +27203,6 @@ class Global {
     }
 
     setWS(wSocket) {
-        console.log("SETWS!");
-        window.testing = this;
         this.__globals.wsHook = wSocket;
     }
 

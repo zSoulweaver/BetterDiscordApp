@@ -20,11 +20,10 @@
 
         constructor(url, protocols) {
             super(url, protocols);
-            this.hook(url);
-            console.log("IS IT RUNNING ASYNC?");
+            this.hook(url, protocols);
         }
 
-        hook(url) {
+        hook(url, protocols) {
             console.info(`[BetterDiscord|WebSocket Proxy] new WebSocket detected, url: ${url}`);
             if (!url.includes('gateway.discord.gg')) return;
 

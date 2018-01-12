@@ -27094,7 +27094,7 @@ module.exports = window.require("electron");
 
 /***/ }),
 /* 131 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
 /**
  * BetterDiscord Client WebpackModules Module
@@ -27111,6 +27111,7 @@ class WebpackModules {
     static async getModuleByProps(props) {
         const modules = await this.getAllModules();
         return new Promise((resolve, reject) => {
+            const rm = [];
             for (let index in modules) {
                 if (!modules.hasOwnProperty(index)) continue;
                 const module = modules[index];
@@ -27118,11 +27119,11 @@ class WebpackModules {
 
                 if (!exports || typeof exports !== 'object') continue;
                 if (!(props in exports)) continue;
-
-                resolve(module.exports);
-                break;
+                rm.push(module);
+                // resolve(module);
+                // break;
             }
-
+            resolve(rm);
             reject(null);
         });
     }
@@ -27133,10 +27134,14 @@ class WebpackModules {
         return new Promise((resolve, reject) => {
             for (let index in modules) {
                 if (!modules.hasOwnProperty(index)) continue;
-                if (typeof exports === 'object' && name in exports) {
+                const module = modules[index];
+                const { exports } = module;
+                if (!exports) continue;
+
+                if (typeof exports === 'object' && (name in exports || exports.name === name)) {
                     resolve(module.exports);
                     break;
-                } else if (false) {
+                } else if (typeof exports === 'function' && exports.name === name) {
                     resolve(module.exports);
                     break;
                 }

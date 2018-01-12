@@ -24,8 +24,6 @@ const __DEV = {
     clientScriptPath: `${clientScriptPath}/betterdiscord.client.js`
 };
 
-console.log(__DEV);
-
 const __pluginPath = path.resolve(__dirname, '..', '..', 'tests', 'plugins');
 const __themePath = path.resolve(__dirname, '..', '..', 'tests', 'themes');
 
@@ -74,6 +72,7 @@ class BetterDiscord {
 
     constructor(args) {
         this.injectScripts = this.injectScripts.bind(this);
+        this.ignite = this.ignite.bind(this);
         Common.Config = new Config(args || dummyArgs);
         this.comms = new Comms();
         this.init();
@@ -86,6 +85,28 @@ class BetterDiscord {
             const window = yield _this.waitForWindow();
             _this.windowUtils = new WindowUtils({ window });
 
+            //Log some events for now
+            _this.windowUtils.webContents.on('did-start-loading', function (e) {
+                return _this.windowUtils.executeJavascript(`console.info('did-start-loading');`);
+            });
+            _this.windowUtils.webContents.on('did-stop-loading', function (e) {
+                return _this.windowUtils.executeJavascript(`console.info('did-stop-loading');`);
+            });
+            _this.windowUtils.webContents.on('did-get-response-details', function (e) {
+                return _this.ignite(_this.windowUtils.window);
+            });
+            _this.windowUtils.webContents.on('page-favicon-updated', function (e) {
+                return _this.windowUtils.executeJavascript(`console.info('page-favicon-updated');`);
+            });
+            _this.windowUtils.webContents.on('will-navigate', function (e) {
+                return _this.windowUtils.executeJavascript(`console.info('will-navigate');`);
+            });
+            _this.windowUtils.webContents.on('did-navigate', function (e) {
+                return _this.windowUtils.executeJavascript(`console.info('did-navigate');`);
+            });
+            _this.windowUtils.webContents.on('did-navigate-in-page', function (e) {
+                return _this.windowUtils.executeJavascript(`console.info('did-navigate-in-page');`);
+            });
             _this.windowUtils.webContents.on('did-finish-load', function (e) {
                 return _this.injectScripts(true);
             });
@@ -99,10 +120,20 @@ class BetterDiscord {
     }
 
     waitForWindow() {
+        var _this2 = this;
+
         return _asyncToGenerator(function* () {
+            const self = _this2;
             return new Promise(function (resolve, reject) {
                 const defer = setInterval(function () {
                     const windows = BrowserWindow.getAllWindows();
+
+                    if (windows.length > 0) {
+                        windows.forEach(function (window) {
+                            self.ignite(window);
+                        });
+                    }
+
                     if (__DEV && __DEV.TESTING && windows.length > 0) {
                         resolve(windows[0]);
                         clearInterval(defer);
@@ -113,12 +144,19 @@ class BetterDiscord {
                         resolve(windows[0]);
                         clearInterval(defer);
                     }
-                }, 100);
+                }, 10);
             });
         })();
     }
 
+    ignite(window) {
+        //Hook things that Discord removes from global. These will be removed again in the client script
+        const sp = path.resolve(__dirname, 'sparkplug.js').replace(/\\/g, '/');
+        window.webContents.executeJavaScript(`require("${sp}");`);
+    }
+
     injectScripts(reload = false) {
+        console.log(`RELOAD? ${reload}`);
         if (__DEV) {
             this.windowUtils.injectScript(__DEV.clientScriptPath);
         }

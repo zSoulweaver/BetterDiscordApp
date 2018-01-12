@@ -14,18 +14,28 @@
         ignited: true
     }
 
-    window.WebSocket = function (endpoint, protocols) {
-        console.info(`[BetterDiscord|WebSocket Proxy] new WebSocket detected, endpoint: ${endpoint}`);
-        const wsHook = new wsOrig(endpoint, protocols);
-        if (window.__bd.setWS) {
-            window.__bd.setWS(wsHook);
-            console.info(`[BetterDiscord|WebSocket Proxy] WebSocket sent to instance`);
-        } else {
-            window.__bd['wsHook'] = wsHook;  
-            console.info(`[BetterDiscord|WebSocket Proxy] WebSocket stored to __bd['wsHook']`);
+    class WSHook extends window.WebSocket {
+
+        constructor(url, protocols) {
+            super(url, protocols);
+            this.hook(url, protocols);
         }
-        
-        return wsHook;
+
+        hook(url, protocols) {
+            console.info(`[BetterDiscord|WebSocket Proxy] new WebSocket detected, url: ${url}`);
+            if (!url.includes('gateway.discord.gg')) return;
+
+            if (window.__bd.setWS) {
+                window.__bd.setWS(this);
+                console.info(`[BetterDiscord|WebSocket Proxy] WebSocket sent to instance`);
+                return;
+            }
+
+            console.info(`[BetterDiscord|WebSocket Proxy] WebSocket stored to __bd['wsHook']`);
+            window.__bd.wsHook = this;
+        }
+
     }
 
+    window.WebSocket = WSHook;
 })();

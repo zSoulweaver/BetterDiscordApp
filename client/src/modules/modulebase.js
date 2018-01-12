@@ -36,8 +36,29 @@ class Module {
 
     set args(t) { }
     get args() { return this.__.args; }
+
+
+    set state(state) { return this.__.state = state; }
     get state() { return this.__.state; }
 
 }
 
 module.exports = { Module };
+
+class Foo2 {
+
+    constructor() {
+        this.__ = {
+            state: {'lo': 'hi'}
+        }
+    }
+
+    set state(state) {
+        return this.__.state = state;
+    }
+
+    get state() {
+        return this.__.state;
+    }
+
+}

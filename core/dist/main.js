@@ -66,6 +66,12 @@ class Comms {
         })();
     }
 
+    send(channel, message) {
+        return _asyncToGenerator(function* () {
+            BDIpc.send(channel, message);
+        })();
+    }
+
 }
 
 class BetterDiscord {
@@ -86,29 +92,24 @@ class BetterDiscord {
             _this.windowUtils = new WindowUtils({ window });
 
             //Log some events for now
-            _this.windowUtils.webContents.on('did-start-loading', function (e) {
-                return _this.windowUtils.executeJavascript(`console.info('did-start-loading');`);
-            });
-            _this.windowUtils.webContents.on('did-stop-loading', function (e) {
-                return _this.windowUtils.executeJavascript(`console.info('did-stop-loading');`);
-            });
-            _this.windowUtils.webContents.on('did-get-response-details', function (e) {
+            //this.windowUtils.webContents.on('did-start-loading', e =>  this.windowUtils.executeJavascript(`console.info('did-start-loading');`));
+            //this.windowUtils.webContents.on('did-stop-loading', e => this.windowUtils.executeJavascript(`console.info('did-stop-loading');`));
+            //this.windowUtils.webContents.on('did-get-response-details', e => this.ignite(this.windowUtils.window));
+            //this.windowUtils.webContents.on('page-favicon-updated', e => this.windowUtils.executeJavascript(`console.info('page-favicon-updated');`));
+            //this.windowUtils.webContents.on('will-navigate', e => this.windowUtils.executeJavascript(`console.info('will-navigate');`));
+            //this.windowUtils.webContents.on('did-navigate', e => this.windowUtils.executeJavascript(`console.info('did-navigate');`));
+            //this.windowUtils.webContents.on('did-navigate-in-page', e => this.windowUtils.executeJavascript(`console.info('did-navigate-in-page');`));
+            //this.windowUtils.webContents.on('did-finish-load', e => this.injectScripts(true));
+
+            _this.windowUtils.events('did-get-response-details', function () {
                 return _this.ignite(_this.windowUtils.window);
             });
-            _this.windowUtils.webContents.on('page-favicon-updated', function (e) {
-                return _this.windowUtils.executeJavascript(`console.info('page-favicon-updated');`);
-            });
-            _this.windowUtils.webContents.on('will-navigate', function (e) {
-                return _this.windowUtils.executeJavascript(`console.info('will-navigate');`);
-            });
-            _this.windowUtils.webContents.on('did-navigate', function (e) {
-                return _this.windowUtils.executeJavascript(`console.info('did-navigate');`);
-            });
-            _this.windowUtils.webContents.on('did-navigate-in-page', function (e) {
-                return _this.windowUtils.executeJavascript(`console.info('did-navigate-in-page');`);
-            });
-            _this.windowUtils.webContents.on('did-finish-load', function (e) {
+            _this.windowUtils.events('did-finish-load', function (e) {
                 return _this.injectScripts(true);
+            });
+
+            _this.windowUtils.events('did-navigate-in-page', function (event, url, isMainFrame) {
+                _this.windowUtils.send('did-navigate-in-page', { event, url, isMainFrame });
             });
 
             setTimeout(function () {

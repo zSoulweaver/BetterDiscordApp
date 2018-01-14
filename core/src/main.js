@@ -65,6 +65,10 @@ class Comms {
         }
     }
 
+    async send(channel, message) {
+        BDIpc.send(channel, message);
+    }
+
 }
 
 class BetterDiscord {
@@ -82,14 +86,22 @@ class BetterDiscord {
         this.windowUtils = new WindowUtils({ window });
 
         //Log some events for now
-        this.windowUtils.webContents.on('did-start-loading', e =>  this.windowUtils.executeJavascript(`console.info('did-start-loading');`));
-        this.windowUtils.webContents.on('did-stop-loading', e => this.windowUtils.executeJavascript(`console.info('did-stop-loading');`));
-        this.windowUtils.webContents.on('did-get-response-details', e => this.ignite(this.windowUtils.window));
-        this.windowUtils.webContents.on('page-favicon-updated', e => this.windowUtils.executeJavascript(`console.info('page-favicon-updated');`));
-        this.windowUtils.webContents.on('will-navigate', e => this.windowUtils.executeJavascript(`console.info('will-navigate');`));
-        this.windowUtils.webContents.on('did-navigate', e => this.windowUtils.executeJavascript(`console.info('did-navigate');`));
-        this.windowUtils.webContents.on('did-navigate-in-page', e => this.windowUtils.executeJavascript(`console.info('did-navigate-in-page');`));
-        this.windowUtils.webContents.on('did-finish-load', e => this.injectScripts(true));
+        //this.windowUtils.webContents.on('did-start-loading', e =>  this.windowUtils.executeJavascript(`console.info('did-start-loading');`));
+        //this.windowUtils.webContents.on('did-stop-loading', e => this.windowUtils.executeJavascript(`console.info('did-stop-loading');`));
+        //this.windowUtils.webContents.on('did-get-response-details', e => this.ignite(this.windowUtils.window));
+        //this.windowUtils.webContents.on('page-favicon-updated', e => this.windowUtils.executeJavascript(`console.info('page-favicon-updated');`));
+        //this.windowUtils.webContents.on('will-navigate', e => this.windowUtils.executeJavascript(`console.info('will-navigate');`));
+        //this.windowUtils.webContents.on('did-navigate', e => this.windowUtils.executeJavascript(`console.info('did-navigate');`));
+        //this.windowUtils.webContents.on('did-navigate-in-page', e => this.windowUtils.executeJavascript(`console.info('did-navigate-in-page');`));
+        //this.windowUtils.webContents.on('did-finish-load', e => this.injectScripts(true));
+
+        this.windowUtils.events('did-get-response-details', () => this.ignite(this.windowUtils.window));
+        this.windowUtils.events('did-finish-load', e => this.injectScripts(true));
+
+        this.windowUtils.events('did-navigate-in-page', (event, url, isMainFrame) => {
+            this.windowUtils.send('did-navigate-in-page', { event, url, isMainFrame });
+        });
+
 
         setTimeout(() => {
             if (__DEV) { this.injectScripts(); }

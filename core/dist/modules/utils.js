@@ -153,6 +153,15 @@ class WindowUtils extends Module {
         if (variable) this.executeJavascript(`${variable} = require("${fpath}");`);else this.executeJavascript(`require("${fpath}");`);
     }
 
+    events(event, callback) {
+        this.webContents.on(event, callback);
+    }
+
+    send(channel, message) {
+        channel = channel.startsWith('bd-') ? channel : `bd-${channel}`;
+        this.webContents.send(channel, message);
+    }
+
 }
 
 module.exports = {

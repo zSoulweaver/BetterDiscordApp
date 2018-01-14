@@ -44,21 +44,3 @@ class Module {
 }
 
 module.exports = { Module };
-
-class Foo2 {
-
-    constructor() {
-        this.__ = {
-            state: {'lo': 'hi'}
-        }
-    }
-
-    set state(state) {
-        return this.__.state = state;
-    }
-
-    get state() {
-        return this.__.state;
-    }
-
-}

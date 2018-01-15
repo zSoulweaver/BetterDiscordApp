@@ -9,6 +9,7 @@
 */
 
 const { Module } = require('./modulebase');
+const { Events } = require('./events');
 
 class Global extends Module {
 
@@ -31,6 +32,7 @@ class Global extends Module {
         const state = this.state;
         state.wsHook = wSocket;
         this.setState(state);
+        Events.emit('socket-created');
     }
 
     getObject(name) {

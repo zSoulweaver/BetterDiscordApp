@@ -26752,6 +26752,7 @@ class BetterDiscord {
     constructor() {
         Global.first();
         window.bdUtils = Utils;
+        window.wpm = WebpackModules;
     }
 
 }
@@ -27624,17 +27625,6 @@ class SocketProxy extends Module {
         const wsHook = Global.getObject('wsHook');
 
         wsHook.addEventListener('message', this.onmessage);
-
-        ////TODO make this better and bind other events
-        /* const onMessageHook = setInterval(() => {
-             if (wsHook.onmessage !== null) {
-                 clearInterval(onMessageHook);
-                 //Discord sets onmessage twice so a timeout for now
-                 setTimeout(() => {
-                     wsHook.onmessage = Utils.overload(wsHook.onmessage, this.onmessage);
-                 }, 2000);
-             }
-         }, 100);*/
     }
 
     onmessage(e) {

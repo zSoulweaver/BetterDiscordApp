@@ -17,6 +17,7 @@ class BetterDiscord {
     constructor() {
         Global.first();
         window.bdUtils = Utils;
+        window.wpm = WebpackModules;
     }
 
 }

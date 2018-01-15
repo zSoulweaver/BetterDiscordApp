@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 122);
+/******/ 	return __webpack_require__(__webpack_require__.s = 123);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -1911,7 +1911,7 @@ function loadLocale(name) {
         try {
             oldLocale = globalLocale._abbr;
             var aliasedRequire = require;
-            __webpack_require__(126)("./" + name);
+            __webpack_require__(127)("./" + name);
             getSetGlobalLocale(oldLocale);
         } catch (e) {}
     }
@@ -4603,7 +4603,7 @@ return hooks;
 
 })));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(125)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(126)(module)))
 
 /***/ }),
 /* 1 */
@@ -4648,6 +4648,10 @@ class Module {
     set args(t) {}
     get args() {
         return this.__.args;
+    }
+
+    set state(state) {
+        return this.__.state = state;
     }
     get state() {
         return this.__.state;
@@ -16322,6 +16326,56 @@ return zhTw;
 /* 121 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * BetterDiscord Client Globals
+ * Copyright (c) 2015-present JsSucks - https://github.com/JsSucks
+ * All rights reserved.
+ * https://github.com/JsSucks - https://betterdiscord.net
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree. 
+*/
+
+const { Module } = __webpack_require__(1);
+
+class Global extends Module {
+
+    bindings() {
+        this.first = this.first.bind(this);
+        this.setWS = this.setWS.bind(this);
+        this.getObject = this.getObject.bind(this);
+    }
+
+    first() {
+        window.fuck = this;
+        if (window.__bd) {
+            this.setState(window.__bd);
+            window.__bd = {
+                setWS: this.setWS
+            };
+        }
+    }
+
+    setWS(wSocket) {
+        const state = this.state;
+        state.wsHook = wSocket;
+        this.setState(state);
+    }
+
+    getObject(name) {
+        return this.state[name];
+    }
+
+}
+
+const _instance = new Global();
+
+module.exports = { 'Global': _instance };
+
+/***/ }),
+/* 122 */
+/***/ (function(module, exports, __webpack_require__) {
+
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
  * jQuery JavaScript Library v3.2.1
  * https://jquery.com/
@@ -26579,7 +26633,7 @@ return jQuery;
 
 
 /***/ }),
-/* 122 */
+/* 123 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26595,7 +26649,7 @@ return jQuery;
 
 
 
-const { Logger, PluginManager, BDIpc, WebpackModules, Global } = __webpack_require__(123);
+const { Logger, PluginManager, BDIpc, WebpackModules, Global, SocketProxy } = __webpack_require__(124);
 
 class BetterDiscord {
 
@@ -26604,6 +26658,7 @@ class BetterDiscord {
         Logger.log('main', 'Init');
         window.pm = PluginManager;
         window.wpm = WebpackModules;
+        window.sp = new SocketProxy();
     }
 
 }
@@ -26614,37 +26669,41 @@ if (window.BetterDiscord) {
     let bdInstance = new BetterDiscord();
     window.BetterDiscord = {
         'vendor': {
-            jQuery: __webpack_require__(121),
-            $: __webpack_require__(121),
+            jQuery: __webpack_require__(122),
+            $: __webpack_require__(122),
             moment: __webpack_require__(0)
         }
     };
 }
 
 /***/ }),
-/* 123 */
+/* 124 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__(124);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__(125);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__utils__);
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_0__utils__, "Logger")) __webpack_require__.d(__webpack_exports__, "Logger", function() { return __WEBPACK_IMPORTED_MODULE_0__utils__["Logger"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__pluginmanager__ = __webpack_require__(127);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__pluginmanager__ = __webpack_require__(128);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__pluginmanager___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__pluginmanager__);
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_1__pluginmanager__, "PluginManager")) __webpack_require__.d(__webpack_exports__, "PluginManager", function() { return __WEBPACK_IMPORTED_MODULE_1__pluginmanager__["PluginManager"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__plugin__ = __webpack_require__(128);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__plugin__ = __webpack_require__(129);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__plugin___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__plugin__);
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_2__plugin__, "Pluging")) __webpack_require__.d(__webpack_exports__, "Pluging", function() { return __WEBPACK_IMPORTED_MODULE_2__plugin__["Pluging"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__bdipc__ = __webpack_require__(129);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__bdipc__ = __webpack_require__(130);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__bdipc___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__bdipc__);
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_3__bdipc__, "BDIpc")) __webpack_require__.d(__webpack_exports__, "BDIpc", function() { return __WEBPACK_IMPORTED_MODULE_3__bdipc__["BDIpc"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__webpackmodules__ = __webpack_require__(131);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__webpackmodules__ = __webpack_require__(132);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__webpackmodules___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4__webpackmodules__);
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_4__webpackmodules__, "WebpackModules")) __webpack_require__.d(__webpack_exports__, "WebpackModules", function() { return __WEBPACK_IMPORTED_MODULE_4__webpackmodules__["WebpackModules"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__global__ = __webpack_require__(132);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__global__ = __webpack_require__(121);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__global___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5__global__);
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_5__global__, "Global")) __webpack_require__.d(__webpack_exports__, "Global", function() { return __WEBPACK_IMPORTED_MODULE_5__global__["Global"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__socketproxy__ = __webpack_require__(133);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__socketproxy___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6__socketproxy__);
+/* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_6__socketproxy__, "SocketProxy")) __webpack_require__.d(__webpack_exports__, "SocketProxy", function() { return __WEBPACK_IMPORTED_MODULE_6__socketproxy__["SocketProxy"]; });
+
 
 
 
@@ -26653,7 +26712,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 /***/ }),
-/* 124 */
+/* 125 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -26701,7 +26760,7 @@ class Logger {
 module.exports = { Logger };
 
 /***/ }),
-/* 125 */
+/* 126 */
 /***/ (function(module, exports) {
 
 module.exports = function(module) {
@@ -26729,7 +26788,7 @@ module.exports = function(module) {
 
 
 /***/ }),
-/* 126 */
+/* 127 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var map = {
@@ -26986,10 +27045,10 @@ webpackContext.keys = function webpackContextKeys() {
 };
 webpackContext.resolve = webpackContextResolve;
 module.exports = webpackContext;
-webpackContext.id = 126;
+webpackContext.id = 127;
 
 /***/ }),
-/* 127 */
+/* 128 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -27039,7 +27098,7 @@ const _instance = new PluginManager();
 module.exports = { PluginManager: _instance };
 
 /***/ }),
-/* 128 */
+/* 129 */
 /***/ (function(module, exports) {
 
 /**
@@ -27061,7 +27120,7 @@ class Plugin {
 module.exports = { Plugin };
 
 /***/ }),
-/* 129 */
+/* 130 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -27074,7 +27133,7 @@ module.exports = { Plugin };
  * LICENSE file in the root directory of this source tree. 
 */
 
-const { ipcRenderer } = __webpack_require__(130);
+const { ipcRenderer } = __webpack_require__(131);
 
 class BDIpc {
 
@@ -27092,13 +27151,13 @@ class BDIpc {
 module.exports = { BDIpc };
 
 /***/ }),
-/* 130 */
+/* 131 */
 /***/ (function(module, exports) {
 
 module.exports = window.require("electron");
 
 /***/ }),
-/* 131 */
+/* 132 */
 /***/ (function(module, exports) {
 
 /**
@@ -27174,11 +27233,11 @@ class WebpackModules {
 module.exports = { WebpackModules };
 
 /***/ }),
-/* 132 */
-/***/ (function(module, exports) {
+/* 133 */
+/***/ (function(module, exports, __webpack_require__) {
 
 /**
- * BetterDiscord Client Globals
+ * BetterDiscord Client Socket Proxy
  * Copyright (c) 2015-present JsSucks - https://github.com/JsSucks
  * All rights reserved.
  * https://github.com/JsSucks - https://betterdiscord.net
@@ -27187,30 +27246,21 @@ module.exports = { WebpackModules };
  * LICENSE file in the root directory of this source tree. 
 */
 
-class Global {
+const { Global } = __webpack_require__(121);
+
+class SocketProxy {
 
     constructor() {
-        this.setWS = this.setWS.bind(this);
+        window.socketProxy = this;
     }
 
-    first() {
-        if (window.__bd) {
-            this.__globals = window.__bd;
-            window.__bd = {
-                setWS: this.setWS
-            };
-        }
-    }
-
-    setWS(wSocket) {
-        this.__globals.wsHook = wSocket;
+    get socket() {
+        return Global.getObject('wsHook');
     }
 
 }
 
-const _instance = new Global();
-
-module.exports = { 'Global': _instance };
+module.exports = { SocketProxy };
 
 /***/ })
 /******/ ]);

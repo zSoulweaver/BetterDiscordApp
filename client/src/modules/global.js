@@ -8,21 +8,19 @@
  * LICENSE file in the root directory of this source tree. 
 */
 
-const { Module } = require('./basemodule');
+const { Module } = require('./modulebase');
 
 class Global extends Module {
 
     bindings() {
         this.first = this.first.bind(this);
         this.setWS = this.setWS.bind(this);
+        this.getObject = this.getObject.bind(this);
     }
-
 
     first() {
         if (window.__bd) {
-            this.setState({
-                globals: window.__bd
-            });
+            this.setState(window.__bd);
             window.__bd = {
                 setWS: this.setWS
             }
@@ -30,13 +28,16 @@ class Global extends Module {
     }
 
     setWS(wSocket) {
-        const { globals } = this.state;
-        globals.wSocket = wSocket;
-        this.setState({globals});
+        const state = this.state;
+        state.wsHook = wSocket;
+        this.setState(state);
+    }
+
+    getObject(name) {
+        return this.state[name];
     }
 
 }
 
 const _instance = new Global();
-
 module.exports = { 'Global': _instance }

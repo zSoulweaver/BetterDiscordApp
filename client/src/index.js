@@ -16,9 +16,6 @@ class BetterDiscord {
 
     constructor() {
         Global.first();
-        Logger.log('main', 'Init');
-        window.pm = PluginManager;
-        window.wpm = WebpackModules;
     }
 
 }

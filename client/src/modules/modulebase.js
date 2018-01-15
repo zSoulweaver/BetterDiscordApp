@@ -26,6 +26,7 @@ class Module {
     init() {
         if (this.bindings) this.bindings();
         if (this.setInitialState) this.setInitialState(this.state);
+        if (this.events) this.events();
     }
 
     setState(newState) {

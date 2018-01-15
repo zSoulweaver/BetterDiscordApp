@@ -25,6 +25,7 @@ class Global extends Module {
             window.__bd = {
                 setWS: this.setWS
             }
+            Events.emit('socket-created');
         }
     }
 

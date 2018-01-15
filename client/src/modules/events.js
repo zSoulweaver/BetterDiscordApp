@@ -28,4 +28,4 @@ class Events {
 
 }
 
-module.exports = Events;
+module.exports = { Events }

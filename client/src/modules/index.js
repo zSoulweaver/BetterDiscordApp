@@ -5,3 +5,4 @@ export { BDIpc } from './bdipc';
 export { WebpackModules } from './webpackmodules';
 export { Global } from './global';
 export { Events } from './events';
+export { SocketProxy } from './discordsocket';

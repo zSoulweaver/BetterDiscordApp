@@ -16,6 +16,7 @@ class PluginManager extends Module {
         this.setState({
             plugins: []
         });
+//Testpush
     }
 
     get plugins() {

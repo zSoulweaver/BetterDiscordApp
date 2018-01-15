@@ -16,6 +16,7 @@ class BetterDiscord {
 
     constructor() {
         Global.first();
+        window.bdUtils = Utils;
     }
 
 }

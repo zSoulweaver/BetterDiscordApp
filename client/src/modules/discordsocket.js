@@ -11,6 +11,7 @@
 const { Events } = require('./events');
 const { Module } = require('./modulebase');
 const { Global } = require('./global');
+const { Utils } = require('./utils');
 
 class SocketProxy extends Module {
 
@@ -20,12 +21,29 @@ class SocketProxy extends Module {
 
     bindings() {
         this.socketCreated = this.socketCreated.bind(this);
-        window.test = this;
+        this.onmessage = this.onmessage.bind(this);
     }
 
     socketCreated() {
-        console.log('SOCKET CREATED!');
-        console.log(Global.getObject('wsHook'));
+        const wsHook = Global.getObject('wsHook');
+
+        //TODO make this better and bind other events
+        const onMessageHook = setInterval(() => {
+            if (wsHook.onmessage !== null) {
+                clearInterval(onMessageHook);
+                //Discord sets onmessage twice so a timeout for now
+                setTimeout(() => {
+                    wsHook.onmessage = Utils.overload(wsHook.onmessage, this.onmessage);
+                }, 2000);
+            }
+        }, 100);
+    }
+
+    onmessage(e) {
+        console.log(e);
+        //TODO fix unpacking
+        const unpacked = this.erlpack.unpack(e.data);
+        console.log(unpacked);
     }
 
     get erlpack() {

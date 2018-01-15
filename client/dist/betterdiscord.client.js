@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 125);
+/******/ 	return __webpack_require__(__webpack_require__.s = 126);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -1911,7 +1911,7 @@ function loadLocale(name) {
         try {
             oldLocale = globalLocale._abbr;
             var aliasedRequire = require;
-            __webpack_require__(128)("./" + name);
+            __webpack_require__(129)("./" + name);
             getSetGlobalLocale(oldLocale);
         } catch (e) {}
     }
@@ -4603,7 +4603,7 @@ return hooks;
 
 })));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(127)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(128)(module)))
 
 /***/ }),
 /* 1 */
@@ -16422,6 +16422,37 @@ return zhTw;
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
+ * BetterDiscord Client IPC Module
+ * Copyright (c) 2015-present JsSucks - https://github.com/JsSucks
+ * All rights reserved.
+ * https://github.com/JsSucks - https://betterdiscord.net
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree. 
+*/
+
+const { ipcRenderer } = __webpack_require__(131);
+
+class BDIpc {
+
+    static async send(channel, message) {
+        channel = channel.startsWith('bd-') ? channel : `bd-${channel}`;
+        const __eid = Date.now().toString();
+        ipcRenderer.send(channel, Object.assign(message ? message : {}, { __eid }));
+        return new Promise((resolve, reject) => {
+            ipcRenderer.once(__eid, (event, arg) => resolve(arg));
+        });
+    }
+
+}
+
+module.exports = { BDIpc };
+
+/***/ }),
+/* 124 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/**
  * BetterDiscord Client Globals
  * Copyright (c) 2015-present JsSucks - https://github.com/JsSucks
  * All rights reserved.
@@ -16469,7 +16500,7 @@ const _instance = new Global();
 module.exports = { 'Global': _instance };
 
 /***/ }),
-/* 124 */
+/* 125 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -26729,7 +26760,7 @@ return jQuery;
 
 
 /***/ }),
-/* 125 */
+/* 126 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26745,7 +26776,7 @@ return jQuery;
 
 
 
-const { Logger, Utils, PluginManager, BDIpc, WebpackModules, SocketProxy, Global } = __webpack_require__(126);
+const { Logger, Utils, PluginManager, BDIpc, WebpackModules, SocketProxy, Global } = __webpack_require__(127);
 
 class BetterDiscord {
 
@@ -26763,15 +26794,15 @@ if (window.BetterDiscord) {
     let bdInstance = new BetterDiscord();
     window.BetterDiscord = {
         'vendor': {
-            jQuery: __webpack_require__(124),
-            $: __webpack_require__(124),
+            jQuery: __webpack_require__(125),
+            $: __webpack_require__(125),
             moment: __webpack_require__(0)
         }
     };
 }
 
 /***/ }),
-/* 126 */
+/* 127 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -26780,19 +26811,19 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__utils__);
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_0__utils__, "Logger")) __webpack_require__.d(__webpack_exports__, "Logger", function() { return __WEBPACK_IMPORTED_MODULE_0__utils__["Logger"]; });
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_0__utils__, "Utils")) __webpack_require__.d(__webpack_exports__, "Utils", function() { return __WEBPACK_IMPORTED_MODULE_0__utils__["Utils"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__pluginmanager__ = __webpack_require__(129);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__pluginmanager__ = __webpack_require__(130);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__pluginmanager___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__pluginmanager__);
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_1__pluginmanager__, "PluginManager")) __webpack_require__.d(__webpack_exports__, "PluginManager", function() { return __WEBPACK_IMPORTED_MODULE_1__pluginmanager__["PluginManager"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__plugin__ = __webpack_require__(130);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__plugin__ = __webpack_require__(132);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__plugin___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__plugin__);
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_2__plugin__, "Pluging")) __webpack_require__.d(__webpack_exports__, "Pluging", function() { return __WEBPACK_IMPORTED_MODULE_2__plugin__["Pluging"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__bdipc__ = __webpack_require__(131);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__bdipc__ = __webpack_require__(123);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__bdipc___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__bdipc__);
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_3__bdipc__, "BDIpc")) __webpack_require__.d(__webpack_exports__, "BDIpc", function() { return __WEBPACK_IMPORTED_MODULE_3__bdipc__["BDIpc"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__webpackmodules__ = __webpack_require__(133);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__webpackmodules___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4__webpackmodules__);
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_4__webpackmodules__, "WebpackModules")) __webpack_require__.d(__webpack_exports__, "WebpackModules", function() { return __WEBPACK_IMPORTED_MODULE_4__webpackmodules__["WebpackModules"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__global__ = __webpack_require__(123);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__global__ = __webpack_require__(124);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__global___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5__global__);
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_5__global__, "Global")) __webpack_require__.d(__webpack_exports__, "Global", function() { return __WEBPACK_IMPORTED_MODULE_5__global__["Global"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__events__ = __webpack_require__(2);
@@ -26811,7 +26842,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 /***/ }),
-/* 127 */
+/* 128 */
 /***/ (function(module, exports) {
 
 module.exports = function(module) {
@@ -26839,7 +26870,7 @@ module.exports = function(module) {
 
 
 /***/ }),
-/* 128 */
+/* 129 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var map = {
@@ -27096,10 +27127,10 @@ webpackContext.keys = function webpackContextKeys() {
 };
 webpackContext.resolve = webpackContextResolve;
 module.exports = webpackContext;
-webpackContext.id = 128;
+webpackContext.id = 129;
 
 /***/ }),
-/* 129 */
+/* 130 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -27113,6 +27144,102 @@ webpackContext.id = 128;
 */
 
 const { Module } = __webpack_require__(1);
+const { BDIpc } = __webpack_require__(123);
+const fs = window.require('fs');
+
+//TODO add these to actual utils
+class Utils {
+
+    static async tryParseJson(jsonString) {
+        try {
+            return JSON.parse(jsonString);
+        } catch (err) {
+            throw {
+                'message': 'Failed to parse json',
+                err
+            };
+        }
+    }
+
+    static get timestamp() {
+        return 'Timestamp';
+    }
+
+}
+
+class FileUtils {
+
+    static async fileExists(path) {
+        return new Promise((resolve, reject) => {
+            fs.stat(path, (err, stats) => {
+                if (err) return reject({
+                    'message': `No such file or directory: ${err.path}`,
+                    err
+                });
+
+                if (!stats.isFile()) return reject({
+                    'message': `Not a file: ${path}`,
+                    stats
+                });
+
+                resolve();
+            });
+        });
+    }
+
+    static async directoryExists(path) {
+        return new Promise(resolve => {
+            fs.stat(path, (err, stats) => {
+                if (err) return reject({
+                    'message': `Directory does not exist: ${path}`,
+                    err
+                });
+
+                if (!stats.isDirectory()) return reject({
+                    'message': `Not a directory: ${path}`,
+                    stats
+                });
+
+                resolve();
+            });
+        });
+    }
+
+    static async readFile(path) {
+        try {
+            await this.fileExists(path);
+        } catch (err) {
+            throw err;
+        }
+
+        return new Promise(resolve => {
+            fs.readFile(path, 'utf-8', (err, data) => {
+                if (err) reject({
+                    'message': `Could not read file: ${path}`,
+                    err
+                });
+
+                resolve(data);
+            });
+        });
+    }
+
+    static async readJsonFromFile(path) {
+        let readFile;
+        try {
+            readFile = await this.readFile(path);
+        } catch (err) {
+            throw err;
+        }
+
+        try {
+            const parsed = await Utils.tryParseJson(readFile);
+            return parsed;
+        } catch (err) {
+            throw Object.assign(err, { path });
+        }
+    }
+}
 
 class PluginManager extends Module {
 
@@ -27120,6 +27247,7 @@ class PluginManager extends Module {
         this.setState({
             plugins: []
         });
+        tests();
     }
 
     get plugins() {
@@ -27127,7 +27255,7 @@ class PluginManager extends Module {
     }
 
     loadPlugin(plugin) {
-        const { plugins } = this;
+        const { plugins } = this.state;
         plugins.push(plugin);
         this.setState({
             plugins
@@ -27142,14 +27270,42 @@ class PluginManager extends Module {
         return this.plugins.find(plugin => plugin.id === id);
     }
 
+    async readConfig(path) {
+        path = `${path}/config.json`;
+        return FileUtils.readJsonFromFile(path);
+    }
+
 }
 
 const _instance = new PluginManager();
 
+async function tests() {
+
+    const config = await BDIpc.send('getConfig');
+    const pluginPath = config.paths.find(path => 'plugins' in path).plugins;
+    console.log(`Plugin Path: ${pluginPath}`);
+
+    const examplePluginPath = `${pluginPath}/Example`;
+
+    //Test read config
+    try {
+        const readConfig = await _instance.readConfig(examplePluginPath);
+        console.log(readConfig);
+    } catch (err) {
+        console.log(err);
+    }
+}
+
 module.exports = { PluginManager: _instance };
 
 /***/ }),
-/* 130 */
+/* 131 */
+/***/ (function(module, exports) {
+
+module.exports = window.require("electron");
+
+/***/ }),
+/* 132 */
 /***/ (function(module, exports) {
 
 /**
@@ -27169,43 +27325,6 @@ class Plugin {
 }
 
 module.exports = { Plugin };
-
-/***/ }),
-/* 131 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/**
- * BetterDiscord Client IPC Module
- * Copyright (c) 2015-present JsSucks - https://github.com/JsSucks
- * All rights reserved.
- * https://github.com/JsSucks - https://betterdiscord.net
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree. 
-*/
-
-const { ipcRenderer } = __webpack_require__(132);
-
-class BDIpc {
-
-    static async send(channel, message) {
-        channel = channel.startsWith('bd-') ? channel : `bd-${channel}`;
-        const __eid = Date.now().toString();
-        ipcRenderer.send(channel, Object.assign(message ? message : {}, { __eid }));
-        return new Promise((resolve, reject) => {
-            ipcRenderer.once(__eid, (event, arg) => resolve(arg));
-        });
-    }
-
-}
-
-module.exports = { BDIpc };
-
-/***/ }),
-/* 132 */
-/***/ (function(module, exports) {
-
-module.exports = window.require("electron");
 
 /***/ }),
 /* 133 */
@@ -27607,7 +27726,7 @@ function isUndefined(arg) {
 
 const { Events } = __webpack_require__(2);
 const { Module } = __webpack_require__(1);
-const { Global } = __webpack_require__(123);
+const { Global } = __webpack_require__(124);
 const { Utils } = __webpack_require__(3);
 
 class SocketProxy extends Module {

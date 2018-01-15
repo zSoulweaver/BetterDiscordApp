@@ -35,6 +35,23 @@
             window.__bd.wsHook = this;
         }
 
+       /* set onmessage(fn) {
+            //Don't set it
+            this.__onmessage = fn;
+            console.log(fn);
+            console.log("Attempted to set onmessage");
+        }
+
+        onmessage(e) {
+            console.log("ON MESSAGE!!!!!!!!!!!!!!!!!!!!");
+            if (this.__onmessage) this.__onmessage(e);
+        }*/
+
+      /*  onmessage(e) {
+            console.log("ON MESSAGE!");
+            if (this.__onmessage) this.__onmessage(e);
+        }*/
+
     }
 
     window.WebSocket = WSHook;

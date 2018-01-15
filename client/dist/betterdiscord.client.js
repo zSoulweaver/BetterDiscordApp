@@ -27623,16 +27623,18 @@ class SocketProxy extends Module {
     socketCreated() {
         const wsHook = Global.getObject('wsHook');
 
-        //TODO make this better and bind other events
-        const onMessageHook = setInterval(() => {
-            if (wsHook.onmessage !== null) {
-                clearInterval(onMessageHook);
-                //Discord sets onmessage twice so a timeout for now
-                setTimeout(() => {
-                    wsHook.onmessage = Utils.overload(wsHook.onmessage, this.onmessage);
-                }, 2000);
-            }
-        }, 100);
+        wsHook.addEventListener('message', this.onmessage);
+
+        ////TODO make this better and bind other events
+        /* const onMessageHook = setInterval(() => {
+             if (wsHook.onmessage !== null) {
+                 clearInterval(onMessageHook);
+                 //Discord sets onmessage twice so a timeout for now
+                 setTimeout(() => {
+                     wsHook.onmessage = Utils.overload(wsHook.onmessage, this.onmessage);
+                 }, 2000);
+             }
+         }, 100);*/
     }
 
     onmessage(e) {

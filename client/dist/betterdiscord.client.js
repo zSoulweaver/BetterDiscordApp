@@ -26686,12 +26686,13 @@ return jQuery;
 
 
 
-const { Logger, PluginManager, BDIpc, WebpackModules, SocketProxy, Global } = __webpack_require__(125);
+const { Logger, Utils, PluginManager, BDIpc, WebpackModules, SocketProxy, Global } = __webpack_require__(125);
 
 class BetterDiscord {
 
     constructor() {
         Global.first();
+        window.bdUtils = Utils;
     }
 
 }
@@ -26718,6 +26719,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__(126);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__utils__);
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_0__utils__, "Logger")) __webpack_require__.d(__webpack_exports__, "Logger", function() { return __WEBPACK_IMPORTED_MODULE_0__utils__["Logger"]; });
+/* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_0__utils__, "Utils")) __webpack_require__.d(__webpack_exports__, "Utils", function() { return __WEBPACK_IMPORTED_MODULE_0__utils__["Utils"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__pluginmanager__ = __webpack_require__(129);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__pluginmanager___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__pluginmanager__);
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_1__pluginmanager__, "PluginManager")) __webpack_require__.d(__webpack_exports__, "PluginManager", function() { return __WEBPACK_IMPORTED_MODULE_1__pluginmanager__["PluginManager"]; });
@@ -26791,10 +26793,21 @@ class Logger {
     static parseLevel(level) {
         return this.levels.hasOwnProperty(level) ? this.levels[level] : 'log';
     }
+}
+
+class Utils {
+
+    static overload(fn, cb) {
+        const orig = fn;
+        return function (...args) {
+            orig(...args);
+            cb(...args);
+        };
+    }
 
 }
 
-module.exports = { Logger };
+module.exports = { Logger, Utils };
 
 /***/ }),
 /* 127 */

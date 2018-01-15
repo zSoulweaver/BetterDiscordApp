@@ -37,7 +37,18 @@ class Logger {
     static parseLevel(level) {
         return this.levels.hasOwnProperty(level) ? this.levels[level] : 'log';
     }
-
 }
 
-module.exports = { Logger }
+class Utils {
+
+    static overload(fn, cb) {
+        const orig = fn;
+        return function(...args) {
+            orig(...args);
+            cb(...args);
+        }
+    }
+    
+}
+
+module.exports = { Logger, Utils }

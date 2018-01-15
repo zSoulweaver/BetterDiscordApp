@@ -20,11 +20,29 @@ class SocketProxy extends Module {
 
     bindings() {
         this.socketCreated = this.socketCreated.bind(this);
+        window.test = this;
     }
 
     socketCreated() {
         console.log('SOCKET CREATED!');
         console.log(Global.getObject('wsHook'));
+    }
+
+    get erlpack() {
+        if (this._erlpack) return this._erlpack;
+
+        try {
+            this._erlpack = window.require('erlpack');
+        } catch (err) {
+            console.log(err);
+            try {
+                this._erlpack = window.require('discord_erlpack');
+            } catch (err) {
+                console.log(err);
+            }
+        }
+
+        return this._erlpack;
     }
 
 }

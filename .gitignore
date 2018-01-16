@@ -20,4 +20,4 @@ Installers/**/*/bin
 Installers/**/*/obj
 Installers/**/*/packages
 .vs
-dist/*
+dist/

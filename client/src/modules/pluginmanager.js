@@ -9,17 +9,27 @@
 */
 
 const { Module } = require('./modulebase');
-const { BDIpc } = require('./bdipc');
-const { Utils, FileUtils } = require('./utils');
-const fs = window.require('fs');
+const { FileUtils } = require('./utils');
+const { Global } = require('./global');
 const path = window.require('path');
-
 
 class Plugin {
 
-    constructor(args) {
-        
+    constructor(pluginInternals) {
+        this.__pluginInternals = pluginInternals;
     }
+
+    get configs() { return this.__pluginInternals.configs }
+    get info() { return this.__pluginInternals.info }
+    get paths() { return this.__pluginInternals.paths }
+    get main() { return this.__pluginInternals.main }
+    get defaultConfig() { return this.configs.defaultConfig }
+    get userConfig() { return this.configs.userConfig }
+    get name() { return this.info.name }
+    get authors() { return this.info.authors }
+    get version() { return this.info.version }
+    get pluginPath() { return this.paths.pluginPath }
+    get enabled() { return this.userConfig.enabled }
 
     start() {
         if (this.onStart) return this.onStart();
@@ -40,24 +50,21 @@ class PluginManager extends Module {
         this.setState({
             plugins: []
         });
-        tests();
     }
 
     get plugins() {
         return this.state.plugins;
     }
 
-    async pluginsPath() {
-        //TODO Get this from config module
-        const config = await BDIpc.send('getConfig');
-        return config.paths.find(path => 'plugins' in path).plugins;
+    pluginsPath() {
+        return Global.getObject('paths').find(path => path.id === 'plugins').path;
     }
 
     async loadPlugin(pluginPath) {
         const { plugins } = this.state;
 
         try {
-            const pluginsPath = await this.pluginsPath();
+            const pluginsPath = this.pluginsPath();
             pluginPath = path.join(pluginsPath, pluginPath);
 
             const loaded = plugins.find(plugin => plugin.pluginPath === pluginPath);
@@ -68,17 +75,28 @@ class PluginManager extends Module {
             const readConfig = await this.readConfig(pluginPath);
             const mainPath = path.join(pluginPath, readConfig.main);
 
-            const plugin = window.require(mainPath)(Plugin, {}, {});
-            const instance = new plugin();
+            //TODO Read plugin user config and call onStart if enabled
+            const userConfigPath = path.join(pluginPath, 'user.config.json');
 
-            plugins.push(Object.assign({
-                pluginPath,
-                instance
-            }, readConfig));
+            let userConfig = readConfig.defaultConfig;
+            try {
+                const readUserConfig = await FileUtils.readJsonFromFile(userConfigPath);
+                userConfig = Object.assign(userConfig, readUserConfig);
+            } catch (err) {/*We don't care if this fails it either means that user config doesn't exist or there's something wrong with it so we revert to default config*/}
+
+            const configs = {
+                defaultConfig: readConfig.defaultConfig,
+                userConfig
+            };
+
+            const plugin = window.require(mainPath)(Plugin, {}, {});
+            const instance = new plugin({configs, info: readConfig.info, main: readConfig.main, paths: { pluginPath }});
+
+            if (instance.enabled) instance.start();
+
+            plugins.push(instance);
 
             this.setState(plugins);
-
-            //TODO Read plugin user config and call onStart if enabled
 
             return instance;
         } catch (err) {
@@ -115,7 +133,7 @@ class PluginManager extends Module {
 
 const _instance = new PluginManager();
 
-async function tests() {
+async function pluginManager() {
 
     const pluginName = 'Example';
 
@@ -124,9 +142,15 @@ async function tests() {
         const plugin = await _instance.loadPlugin(pluginName);
         //Attempt to load the same plugin again
         const plugin2 = await _instance.loadPlugin(pluginName);
+
+        return true;
     } catch (err) {
         console.log(`Failed to load plugin! ${err.message}`);
+        throw err;
     }
 }
+
+if (window.bdTests) window.bdTests.pluginManager = pluginManager;
+else window.bdTests = { pluginManager };
 
 module.exports = { PluginManager: _instance }

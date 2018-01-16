@@ -34,7 +34,7 @@ const Common = {};
 
 const dummyArgs = {
     'version': '0.3.1',
-    'paths': [{ 'base': 'basePath' }, { 'plugins': __pluginPath }, { 'themes': __themePath }]
+    'paths': [{ 'id': 'base', 'path': 'basePath' }, { 'id': 'plugins', 'path': __pluginPath }, { 'id': 'themes', 'path': __themePath }]
 };
 
 console.log(dummyArgs);

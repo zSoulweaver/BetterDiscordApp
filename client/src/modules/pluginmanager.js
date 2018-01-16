@@ -13,17 +13,16 @@ const { FileUtils } = require('./utils');
 const { Global } = require('./global');
 const path = window.require('path');
 
-
 class Plugin {
 
-    constructor(plugingInternals) {
-        this.__plugingInternals = plugingInternals;
+    constructor(pluginInternals) {
+        this.__pluginInternals = pluginInternals;
     }
 
-    get configs() { return this.__plugingInternals.configs }
-    get info() { return this.__plugingInternals.info }
-    get paths() { return this.__plugingInternals.paths }
-    get main() { return this.__plugingInternals.main }
+    get configs() { return this.__pluginInternals.configs }
+    get info() { return this.__pluginInternals.info }
+    get paths() { return this.__pluginInternals.paths }
+    get main() { return this.__pluginInternals.main }
     get defaultConfig() { return this.configs.defaultConfig }
     get userConfig() { return this.configs.userConfig }
     get name() { return this.info.name }

@@ -41,7 +41,6 @@ class PluginManager extends Module {
         this.setState({
             plugins: []
         });
-        tests();
     }
 
     get plugins() {
@@ -114,7 +113,7 @@ class PluginManager extends Module {
 
 const _instance = new PluginManager();
 
-async function tests() {
+async function pluginManager() {
 
     const pluginName = 'Example';
 
@@ -123,9 +122,15 @@ async function tests() {
         const plugin = await _instance.loadPlugin(pluginName);
         //Attempt to load the same plugin again
         const plugin2 = await _instance.loadPlugin(pluginName);
+
+        return true;
     } catch (err) {
         console.log(`Failed to load plugin! ${err.message}`);
+        throw err;
     }
 }
+
+if (window.bdTests) window.bdTests.pluginManager = pluginManager;
+else window.bdTests = { pluginManager };
 
 module.exports = { PluginManager: _instance }

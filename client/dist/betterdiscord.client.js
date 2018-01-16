@@ -4667,41 +4667,6 @@ module.exports = { Module };
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
- * BetterDiscord Events
- * Copyright (c) 2015-present JsSucks - https://github.com/JsSucks
- * All rights reserved.
- * https://github.com/JsSucks - https://betterdiscord.net
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree. 
-*/
-
-const { EventEmitter } = __webpack_require__(134);
-const emitter = new EventEmitter();
-
-class Events {
-
-    static on(eventName, callBack) {
-        emitter.on(eventName, callBack);
-    }
-
-    static off(eventName, callBack) {
-        emitter.removeListener(eventName, callBack);
-    }
-
-    static emit(...args) {
-        emitter.emit(...args);
-    }
-
-}
-
-module.exports = { Events };
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/**
  * BetterDiscord Client Utils Module
  * Copyright (c) 2015-present JsSucks - https://github.com/JsSucks
  * All rights reserved.
@@ -4713,6 +4678,8 @@ module.exports = { Events };
 
 const { Module } = __webpack_require__(1);
 const moment = __webpack_require__(0);
+const fs = window.require('fs');
+const path = window.require('path');
 
 const logs = [];
 
@@ -4752,9 +4719,129 @@ class Utils {
         };
     }
 
+    static async tryParseJson(jsonString) {
+        try {
+            return JSON.parse(jsonString);
+        } catch (err) {
+            throw {
+                'message': 'Failed to parse json',
+                err
+            };
+        }
+    }
+
 }
 
-module.exports = { Logger, Utils };
+class FileUtils {
+
+    static async fileExists(path) {
+        return new Promise((resolve, reject) => {
+            fs.stat(path, (err, stats) => {
+                if (err) return reject({
+                    'message': `No such file or directory: ${err.path}`,
+                    err
+                });
+
+                if (!stats.isFile()) return reject({
+                    'message': `Not a file: ${path}`,
+                    stats
+                });
+
+                resolve();
+            });
+        });
+    }
+
+    static async directoryExists(path) {
+        return new Promise(resolve => {
+            fs.stat(path, (err, stats) => {
+                if (err) return reject({
+                    'message': `Directory does not exist: ${path}`,
+                    err
+                });
+
+                if (!stats.isDirectory()) return reject({
+                    'message': `Not a directory: ${path}`,
+                    stats
+                });
+
+                resolve();
+            });
+        });
+    }
+
+    static async readFile(path) {
+        try {
+            await this.fileExists(path);
+        } catch (err) {
+            throw err;
+        }
+
+        return new Promise(resolve => {
+            fs.readFile(path, 'utf-8', (err, data) => {
+                if (err) reject({
+                    'message': `Could not read file: ${path}`,
+                    err
+                });
+
+                resolve(data);
+            });
+        });
+    }
+
+    static async readJsonFromFile(path) {
+        let readFile;
+        try {
+            readFile = await this.readFile(path);
+        } catch (err) {
+            throw err;
+        }
+
+        try {
+            const parsed = await Utils.tryParseJson(readFile);
+            return parsed;
+        } catch (err) {
+            throw Object.assign(err, { path });
+        }
+    }
+}
+
+module.exports = { Logger, Utils, FileUtils };
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/**
+ * BetterDiscord Events
+ * Copyright (c) 2015-present JsSucks - https://github.com/JsSucks
+ * All rights reserved.
+ * https://github.com/JsSucks - https://betterdiscord.net
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree. 
+*/
+
+const { EventEmitter } = __webpack_require__(134);
+const emitter = new EventEmitter();
+
+class Events {
+
+    static on(eventName, callBack) {
+        emitter.on(eventName, callBack);
+    }
+
+    static off(eventName, callBack) {
+        emitter.removeListener(eventName, callBack);
+    }
+
+    static emit(...args) {
+        emitter.emit(...args);
+    }
+
+}
+
+module.exports = { Events };
 
 /***/ }),
 /* 4 */
@@ -16463,7 +16550,7 @@ module.exports = { BDIpc };
 */
 
 const { Module } = __webpack_require__(1);
-const { Events } = __webpack_require__(2);
+const { Events } = __webpack_require__(3);
 
 class Global extends Module {
 
@@ -26807,10 +26894,11 @@ if (window.BetterDiscord) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__utils__);
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_0__utils__, "Logger")) __webpack_require__.d(__webpack_exports__, "Logger", function() { return __WEBPACK_IMPORTED_MODULE_0__utils__["Logger"]; });
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_0__utils__, "Utils")) __webpack_require__.d(__webpack_exports__, "Utils", function() { return __WEBPACK_IMPORTED_MODULE_0__utils__["Utils"]; });
+/* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_0__utils__, "FileUtils")) __webpack_require__.d(__webpack_exports__, "FileUtils", function() { return __WEBPACK_IMPORTED_MODULE_0__utils__["FileUtils"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__pluginmanager__ = __webpack_require__(130);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__pluginmanager___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__pluginmanager__);
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_1__pluginmanager__, "PluginManager")) __webpack_require__.d(__webpack_exports__, "PluginManager", function() { return __WEBPACK_IMPORTED_MODULE_1__pluginmanager__["PluginManager"]; });
@@ -26826,7 +26914,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__global__ = __webpack_require__(124);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__global___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5__global__);
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_5__global__, "Global")) __webpack_require__.d(__webpack_exports__, "Global", function() { return __WEBPACK_IMPORTED_MODULE_5__global__["Global"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__events__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__events__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__events___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6__events__);
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_6__events__, "Events")) __webpack_require__.d(__webpack_exports__, "Events", function() { return __WEBPACK_IMPORTED_MODULE_6__events__["Events"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__discordsocket__ = __webpack_require__(135);
@@ -27145,102 +27233,9 @@ webpackContext.id = 129;
 
 const { Module } = __webpack_require__(1);
 const { BDIpc } = __webpack_require__(123);
+const { Utils, FileUtils } = __webpack_require__(2);
 const fs = window.require('fs');
 const path = window.require('path');
-
-//TODO add these to actual utils
-class Utils {
-
-    static async tryParseJson(jsonString) {
-        try {
-            return JSON.parse(jsonString);
-        } catch (err) {
-            throw {
-                'message': 'Failed to parse json',
-                err
-            };
-        }
-    }
-
-    static get timestamp() {
-        return 'Timestamp';
-    }
-
-}
-
-class FileUtils {
-
-    static async fileExists(path) {
-        return new Promise((resolve, reject) => {
-            fs.stat(path, (err, stats) => {
-                if (err) return reject({
-                    'message': `No such file or directory: ${err.path}`,
-                    err
-                });
-
-                if (!stats.isFile()) return reject({
-                    'message': `Not a file: ${path}`,
-                    stats
-                });
-
-                resolve();
-            });
-        });
-    }
-
-    static async directoryExists(path) {
-        return new Promise(resolve => {
-            fs.stat(path, (err, stats) => {
-                if (err) return reject({
-                    'message': `Directory does not exist: ${path}`,
-                    err
-                });
-
-                if (!stats.isDirectory()) return reject({
-                    'message': `Not a directory: ${path}`,
-                    stats
-                });
-
-                resolve();
-            });
-        });
-    }
-
-    static async readFile(path) {
-        try {
-            await this.fileExists(path);
-        } catch (err) {
-            throw err;
-        }
-
-        return new Promise(resolve => {
-            fs.readFile(path, 'utf-8', (err, data) => {
-                if (err) reject({
-                    'message': `Could not read file: ${path}`,
-                    err
-                });
-
-                resolve(data);
-            });
-        });
-    }
-
-    static async readJsonFromFile(path) {
-        let readFile;
-        try {
-            readFile = await this.readFile(path);
-        } catch (err) {
-            throw err;
-        }
-
-        try {
-            const parsed = await Utils.tryParseJson(readFile);
-            return parsed;
-        } catch (err) {
-            throw Object.assign(err, { path });
-        }
-    }
-}
 
 class Plugin {
 
@@ -27248,10 +27243,12 @@ class Plugin {
 
     start() {
         if (this.onStart) return this.onStart();
+        return true; //Assume plugin started since it doesn't have onStart
     }
 
     stop() {
         if (this.onStop) return this.onStop();
+        return true; //Assume plugin stopped since it doesn't have onStop
     }
 
 }
@@ -27274,13 +27271,13 @@ class PluginManager extends Module {
         const { plugins } = this.state;
 
         try {
+
             const loaded = plugins.find(plugin => plugin.pluginPath === pluginPath);
             if (loaded) {
                 throw { 'message': 'Attempted to load an already loaded plugin' };
             }
 
             const readConfig = await this.readConfig(pluginPath);
-
             const mainPath = path.join(pluginPath, readConfig.main);
 
             const plugin = window.require(mainPath)(Plugin, {}, {});
@@ -27299,10 +27296,14 @@ class PluginManager extends Module {
         }
     }
 
+    async reloadPlugin(pluginPath) {
+        //TODO Cleanup loaded plugin
+        return await this.loadPlugin(pluginPath);
+    }
+
     getPluginByName(name) {
         return this.plugins.find(plugin => plugin.name === name);
     }
-
     getPluginById(id) {
         return this.plugins.find(plugin => plugin.id === id);
     }
@@ -27310,13 +27311,13 @@ class PluginManager extends Module {
     stopPlugin(name) {
         const plugin = this.getPluginByName(name);
         if (plugin && plugin.instance) return plugin.instance.stop();
-        return null;
+        return true; //Return true anyways since plugin doesn't exist
     }
 
     startPlugin(name) {
         const plugin = this.getPluginByName(name);
         if (plugin && plugin.instance) return plugin.instance.start();
-        return null;
+        return true; //Return true anyways since plugin doesn't exist
     }
 
     async readConfig(path) {
@@ -27334,26 +27335,13 @@ async function tests() {
     const config = await BDIpc.send('getConfig');
     const pluginPath = config.paths.find(path => 'plugins' in path).plugins;
     try {
+        //Load test plugin
         const plugin = await _instance.loadPlugin(path.join(pluginPath, pluginName));
+        //Attempt to load the same plugin again
         const plugin2 = await _instance.loadPlugin(path.join(pluginPath, pluginName));
-        window.pl = plugin;
     } catch (err) {
         console.log(`Failed to load plugin! ${err.message}`);
     }
-
-    // const config = await BDIpc.send('getConfig');
-    //  const pluginPath = config.paths.find(path => 'plugins' in path).plugins;
-
-    // const examplePluginPath = path.join(pluginPath, pluginName);
-
-    //Test read config
-    /*try {
-        const readConfig = await _instance.readConfig(examplePluginPath);
-        console.log(readConfig);
-          window.testPlugin = window.require(path.join(examplePluginPath, readConfig.main));
-      } catch (err) {
-        console.log(err);
-    }*/
 }
 
 module.exports = { PluginManager: _instance };
@@ -27784,10 +27772,10 @@ function isUndefined(arg) {
  * LICENSE file in the root directory of this source tree. 
 */
 
-const { Events } = __webpack_require__(2);
+const { Events } = __webpack_require__(3);
 const { Module } = __webpack_require__(1);
 const { Global } = __webpack_require__(124);
-const { Utils } = __webpack_require__(3);
+const { Utils } = __webpack_require__(2);
 
 class SocketProxy extends Module {
 

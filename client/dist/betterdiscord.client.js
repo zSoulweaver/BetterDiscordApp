@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 125);
+/******/ 	return __webpack_require__(__webpack_require__.s = 126);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -1911,7 +1911,7 @@ function loadLocale(name) {
         try {
             oldLocale = globalLocale._abbr;
             var aliasedRequire = require;
-            __webpack_require__(128)("./" + name);
+            __webpack_require__(131)("./" + name);
             getSetGlobalLocale(oldLocale);
         } catch (e) {}
     }
@@ -4603,7 +4603,7 @@ return hooks;
 
 })));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(127)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(130)(module)))
 
 /***/ }),
 /* 1 */
@@ -4676,7 +4676,7 @@ module.exports = { Module };
  * LICENSE file in the root directory of this source tree. 
 */
 
-const { EventEmitter } = __webpack_require__(134);
+const { EventEmitter } = __webpack_require__(128);
 const emitter = new EventEmitter();
 
 class Events {
@@ -4702,6 +4702,100 @@ module.exports = { Events };
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
+ * BetterDiscord Client Globals
+ * Copyright (c) 2015-present JsSucks - https://github.com/JsSucks
+ * All rights reserved.
+ * https://github.com/JsSucks - https://betterdiscord.net
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree. 
+*/
+
+const { Module } = __webpack_require__(1);
+const { Events } = __webpack_require__(2);
+const { BDIpc } = __webpack_require__(4);
+
+class Global extends Module {
+
+    constructor(args) {
+        super(args);
+        console.log("GLOBAL!");
+        this.first();
+    }
+
+    bindings() {
+        this.first = this.first.bind(this);
+        this.setWS = this.setWS.bind(this);
+        this.getObject = this.getObject.bind(this);
+    }
+
+    first() {
+        (async () => {
+            const config = await BDIpc.send('getConfig');
+            this.setState(config);
+        })();
+
+        if (window.__bd) {
+            this.setState(window.__bd);
+            window.__bd = {
+                setWS: this.setWS
+            };
+            Events.emit('socket-created');
+        }
+    }
+
+    setWS(wSocket) {
+        const state = this.state;
+        state.wsHook = wSocket;
+        this.setState(state);
+        Events.emit('socket-created');
+    }
+
+    getObject(name) {
+        return this.state[name];
+    }
+
+}
+
+const _instance = new Global();
+module.exports = { 'Global': _instance };
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/**
+ * BetterDiscord Client IPC Module
+ * Copyright (c) 2015-present JsSucks - https://github.com/JsSucks
+ * All rights reserved.
+ * https://github.com/JsSucks - https://betterdiscord.net
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree. 
+*/
+
+const { ipcRenderer } = __webpack_require__(129);
+
+class BDIpc {
+
+    static async send(channel, message) {
+        channel = channel.startsWith('bd-') ? channel : `bd-${channel}`;
+        const __eid = Date.now().toString();
+        ipcRenderer.send(channel, Object.assign(message ? message : {}, { __eid }));
+        return new Promise((resolve, reject) => {
+            ipcRenderer.once(__eid, (event, arg) => resolve(arg));
+        });
+    }
+
+}
+
+module.exports = { BDIpc };
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/**
  * BetterDiscord Client Utils Module
  * Copyright (c) 2015-present JsSucks - https://github.com/JsSucks
  * All rights reserved.
@@ -4713,6 +4807,8 @@ module.exports = { Events };
 
 const { Module } = __webpack_require__(1);
 const moment = __webpack_require__(0);
+const fs = window.require('fs');
+const path = window.require('path');
 
 const logs = [];
 
@@ -4752,12 +4848,97 @@ class Utils {
         };
     }
 
+    static async tryParseJson(jsonString) {
+        try {
+            return JSON.parse(jsonString);
+        } catch (err) {
+            throw {
+                'message': 'Failed to parse json',
+                err
+            };
+        }
+    }
+
 }
 
-module.exports = { Logger, Utils };
+class FileUtils {
+
+    static async fileExists(path) {
+        return new Promise((resolve, reject) => {
+            fs.stat(path, (err, stats) => {
+                if (err) return reject({
+                    'message': `No such file or directory: ${err.path}`,
+                    err
+                });
+
+                if (!stats.isFile()) return reject({
+                    'message': `Not a file: ${path}`,
+                    stats
+                });
+
+                resolve();
+            });
+        });
+    }
+
+    static async directoryExists(path) {
+        return new Promise(resolve => {
+            fs.stat(path, (err, stats) => {
+                if (err) return reject({
+                    'message': `Directory does not exist: ${path}`,
+                    err
+                });
+
+                if (!stats.isDirectory()) return reject({
+                    'message': `Not a directory: ${path}`,
+                    stats
+                });
+
+                resolve();
+            });
+        });
+    }
+
+    static async readFile(path) {
+        try {
+            await this.fileExists(path);
+        } catch (err) {
+            throw err;
+        }
+
+        return new Promise(resolve => {
+            fs.readFile(path, 'utf-8', (err, data) => {
+                if (err) reject({
+                    'message': `Could not read file: ${path}`,
+                    err
+                });
+
+                resolve(data);
+            });
+        });
+    }
+
+    static async readJsonFromFile(path) {
+        let readFile;
+        try {
+            readFile = await this.readFile(path);
+        } catch (err) {
+            throw err;
+        }
+
+        try {
+            const parsed = await Utils.tryParseJson(readFile);
+            return parsed;
+        } catch (err) {
+            throw Object.assign(err, { path });
+        }
+    }
+}
+
+module.exports = { Logger, Utils, FileUtils };
 
 /***/ }),
-/* 4 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -4836,7 +5017,7 @@ return af;
 
 
 /***/ }),
-/* 5 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -4984,7 +5165,7 @@ return ar;
 
 
 /***/ }),
-/* 6 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -5049,7 +5230,7 @@ return arDz;
 
 
 /***/ }),
-/* 7 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -5114,7 +5295,7 @@ return arKw;
 
 
 /***/ }),
-/* 8 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -5246,7 +5427,7 @@ return arLy;
 
 
 /***/ }),
-/* 9 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -5312,7 +5493,7 @@ return arMa;
 
 
 /***/ }),
-/* 10 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -5423,7 +5604,7 @@ return arSa;
 
 
 /***/ }),
-/* 11 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -5488,7 +5669,7 @@ return arTn;
 
 
 /***/ }),
-/* 12 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -5599,7 +5780,7 @@ return az;
 
 
 /***/ }),
-/* 13 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -5739,7 +5920,7 @@ return be;
 
 
 /***/ }),
-/* 14 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -5835,7 +6016,7 @@ return bg;
 
 
 /***/ }),
-/* 15 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -5900,7 +6081,7 @@ return bm;
 
 
 /***/ }),
-/* 16 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -6025,7 +6206,7 @@ return bn;
 
 
 /***/ }),
-/* 17 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -6150,7 +6331,7 @@ return bo;
 
 
 /***/ }),
-/* 18 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -6264,7 +6445,7 @@ return br;
 
 
 /***/ }),
-/* 19 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -6422,7 +6603,7 @@ return bs;
 
 
 /***/ }),
-/* 20 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -6516,7 +6697,7 @@ return ca;
 
 
 /***/ }),
-/* 21 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -6701,7 +6882,7 @@ return cs;
 
 
 /***/ }),
-/* 22 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -6770,7 +6951,7 @@ return cv;
 
 
 /***/ }),
-/* 23 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -6857,7 +7038,7 @@ return cy;
 
 
 /***/ }),
-/* 24 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -6923,7 +7104,7 @@ return da;
 
 
 /***/ }),
-/* 25 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -7007,7 +7188,7 @@ return de;
 
 
 /***/ }),
-/* 26 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -7092,7 +7273,7 @@ return deAt;
 
 
 /***/ }),
-/* 27 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -7176,7 +7357,7 @@ return deCh;
 
 
 /***/ }),
-/* 28 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -7282,7 +7463,7 @@ return dv;
 
 
 /***/ }),
-/* 29 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -7388,7 +7569,7 @@ return el;
 
 
 /***/ }),
-/* 30 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -7461,7 +7642,7 @@ return enAu;
 
 
 /***/ }),
-/* 31 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -7530,7 +7711,7 @@ return enCa;
 
 
 /***/ }),
-/* 32 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -7603,7 +7784,7 @@ return enGb;
 
 
 /***/ }),
-/* 33 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -7676,7 +7857,7 @@ return enIe;
 
 
 /***/ }),
-/* 34 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -7749,7 +7930,7 @@ return enNz;
 
 
 /***/ }),
-/* 35 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -7828,7 +8009,7 @@ return eo;
 
 
 /***/ }),
-/* 36 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -7926,7 +8107,7 @@ return es;
 
 
 /***/ }),
-/* 37 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -8023,7 +8204,7 @@ return esDo;
 
 
 /***/ }),
-/* 38 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -8112,7 +8293,7 @@ return esUs;
 
 
 /***/ }),
-/* 39 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -8199,7 +8380,7 @@ return et;
 
 
 /***/ }),
-/* 40 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -8271,7 +8452,7 @@ return eu;
 
 
 /***/ }),
-/* 41 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -8384,7 +8565,7 @@ return fa;
 
 
 /***/ }),
-/* 42 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -8499,7 +8680,7 @@ return fi;
 
 
 /***/ }),
-/* 43 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -8565,7 +8746,7 @@ return fo;
 
 
 /***/ }),
-/* 44 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -8654,7 +8835,7 @@ return fr;
 
 
 /***/ }),
-/* 45 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -8734,7 +8915,7 @@ return frCa;
 
 
 /***/ }),
-/* 46 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -8818,7 +8999,7 @@ return frCh;
 
 
 /***/ }),
-/* 47 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -8899,7 +9080,7 @@ return fy;
 
 
 /***/ }),
-/* 48 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -8981,7 +9162,7 @@ return gd;
 
 
 /***/ }),
-/* 49 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -9064,7 +9245,7 @@ return gl;
 
 
 /***/ }),
-/* 50 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -9193,7 +9374,7 @@ return gomLatn;
 
 
 /***/ }),
-/* 51 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -9323,7 +9504,7 @@ return gu;
 
 
 /***/ }),
-/* 52 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -9428,7 +9609,7 @@ return he;
 
 
 /***/ }),
-/* 53 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -9558,7 +9739,7 @@ return hi;
 
 
 /***/ }),
-/* 54 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -9718,7 +9899,7 @@ return hr;
 
 
 /***/ }),
-/* 55 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -9834,7 +10015,7 @@ return hu;
 
 
 /***/ }),
-/* 56 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -9935,7 +10116,7 @@ return hyAm;
 
 
 /***/ }),
-/* 57 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -10024,7 +10205,7 @@ return id;
 
 
 /***/ }),
-/* 58 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -10162,7 +10343,7 @@ return is;
 
 
 /***/ }),
-/* 59 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -10238,7 +10419,7 @@ return it;
 
 
 /***/ }),
-/* 60 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -10324,7 +10505,7 @@ return ja;
 
 
 /***/ }),
-/* 61 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -10413,7 +10594,7 @@ return jv;
 
 
 /***/ }),
-/* 62 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -10508,7 +10689,7 @@ return ka;
 
 
 /***/ }),
-/* 63 */
+/* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -10601,7 +10782,7 @@ return kk;
 
 
 /***/ }),
-/* 64 */
+/* 66 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -10665,7 +10846,7 @@ return km;
 
 
 /***/ }),
-/* 65 */
+/* 67 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -10797,7 +10978,7 @@ return kn;
 
 
 /***/ }),
-/* 66 */
+/* 68 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -10885,7 +11066,7 @@ return ko;
 
 
 /***/ }),
-/* 67 */
+/* 69 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -10979,7 +11160,7 @@ return ky;
 
 
 /***/ }),
-/* 68 */
+/* 70 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -11122,7 +11303,7 @@ return lb;
 
 
 /***/ }),
-/* 69 */
+/* 71 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -11198,7 +11379,7 @@ return lo;
 
 
 /***/ }),
-/* 70 */
+/* 72 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -11322,7 +11503,7 @@ return lt;
 
 
 /***/ }),
-/* 71 */
+/* 73 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -11426,7 +11607,7 @@ return lv;
 
 
 /***/ }),
-/* 72 */
+/* 74 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -11544,7 +11725,7 @@ return me;
 
 
 /***/ }),
-/* 73 */
+/* 75 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -11614,7 +11795,7 @@ return mi;
 
 
 /***/ }),
-/* 74 */
+/* 76 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -11710,7 +11891,7 @@ return mk;
 
 
 /***/ }),
-/* 75 */
+/* 77 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -11797,7 +11978,7 @@ return ml;
 
 
 /***/ }),
-/* 76 */
+/* 78 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -11964,7 +12145,7 @@ return mr;
 
 
 /***/ }),
-/* 77 */
+/* 79 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -12052,7 +12233,7 @@ return ms;
 
 
 /***/ }),
-/* 78 */
+/* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -12141,7 +12322,7 @@ return msMy;
 
 
 /***/ }),
-/* 79 */
+/* 81 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -12207,7 +12388,7 @@ return mt;
 
 
 /***/ }),
-/* 80 */
+/* 82 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -12309,7 +12490,7 @@ return my;
 
 
 /***/ }),
-/* 81 */
+/* 83 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -12378,7 +12559,7 @@ return nb;
 
 
 /***/ }),
-/* 82 */
+/* 84 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -12507,7 +12688,7 @@ return ne;
 
 
 /***/ }),
-/* 83 */
+/* 85 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -12601,7 +12782,7 @@ return nl;
 
 
 /***/ }),
-/* 84 */
+/* 86 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -12695,7 +12876,7 @@ return nlBe;
 
 
 /***/ }),
-/* 85 */
+/* 87 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -12761,7 +12942,7 @@ return nn;
 
 
 /***/ }),
-/* 86 */
+/* 88 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -12891,7 +13072,7 @@ return paIn;
 
 
 /***/ }),
-/* 87 */
+/* 89 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -13023,7 +13204,7 @@ return pl;
 
 
 /***/ }),
-/* 88 */
+/* 90 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -13094,7 +13275,7 @@ return pt;
 
 
 /***/ }),
-/* 89 */
+/* 91 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -13161,7 +13342,7 @@ return ptBr;
 
 
 /***/ }),
-/* 90 */
+/* 92 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -13243,7 +13424,7 @@ return ro;
 
 
 /***/ }),
-/* 91 */
+/* 93 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -13433,7 +13614,7 @@ return ru;
 
 
 /***/ }),
-/* 92 */
+/* 94 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -13537,7 +13718,7 @@ return sd;
 
 
 /***/ }),
-/* 93 */
+/* 95 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -13604,7 +13785,7 @@ return se;
 
 
 /***/ }),
-/* 94 */
+/* 96 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -13681,7 +13862,7 @@ return si;
 
 
 /***/ }),
-/* 95 */
+/* 97 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -13844,7 +14025,7 @@ return sk;
 
 
 /***/ }),
-/* 96 */
+/* 98 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -14023,7 +14204,7 @@ return sl;
 
 
 /***/ }),
-/* 97 */
+/* 99 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -14099,7 +14280,7 @@ return sq;
 
 
 /***/ }),
-/* 98 */
+/* 100 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -14216,7 +14397,7 @@ return sr;
 
 
 /***/ }),
-/* 99 */
+/* 101 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -14333,7 +14514,7 @@ return srCyrl;
 
 
 /***/ }),
-/* 100 */
+/* 102 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -14428,7 +14609,7 @@ return ss;
 
 
 /***/ }),
-/* 101 */
+/* 103 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -14503,7 +14684,7 @@ return sv;
 
 
 /***/ }),
-/* 102 */
+/* 104 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -14568,7 +14749,7 @@ return sw;
 
 
 /***/ }),
-/* 103 */
+/* 105 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -14704,7 +14885,7 @@ return ta;
 
 
 /***/ }),
-/* 104 */
+/* 106 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -14799,7 +14980,7 @@ return te;
 
 
 /***/ }),
-/* 105 */
+/* 107 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -14873,7 +15054,7 @@ return tet;
 
 
 /***/ }),
-/* 106 */
+/* 108 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -14946,7 +15127,7 @@ return th;
 
 
 /***/ }),
-/* 107 */
+/* 109 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -15014,7 +15195,7 @@ return tlPh;
 
 
 /***/ }),
-/* 108 */
+/* 110 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -15142,7 +15323,7 @@ return tlh;
 
 
 /***/ }),
-/* 109 */
+/* 111 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -15238,7 +15419,7 @@ return tr;
 
 
 /***/ }),
-/* 110 */
+/* 112 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -15336,7 +15517,7 @@ return tzl;
 
 
 /***/ }),
-/* 111 */
+/* 113 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -15400,7 +15581,7 @@ return tzm;
 
 
 /***/ }),
-/* 112 */
+/* 114 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -15464,7 +15645,7 @@ return tzmLatn;
 
 
 /***/ }),
-/* 113 */
+/* 115 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -15622,7 +15803,7 @@ return uk;
 
 
 /***/ }),
-/* 114 */
+/* 116 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -15727,7 +15908,7 @@ return ur;
 
 
 /***/ }),
-/* 115 */
+/* 117 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -15791,7 +15972,7 @@ return uz;
 
 
 /***/ }),
-/* 116 */
+/* 118 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -15855,7 +16036,7 @@ return uzLatn;
 
 
 /***/ }),
-/* 117 */
+/* 119 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -15940,7 +16121,7 @@ return vi;
 
 
 /***/ }),
-/* 118 */
+/* 120 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -16014,7 +16195,7 @@ return xPseudo;
 
 
 /***/ }),
-/* 119 */
+/* 121 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -16080,7 +16261,7 @@ return yo;
 
 
 /***/ }),
-/* 120 */
+/* 122 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -16197,7 +16378,7 @@ return zhCn;
 
 
 /***/ }),
-/* 121 */
+/* 123 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -16308,7 +16489,7 @@ return zhHk;
 
 
 /***/ }),
-/* 122 */
+/* 124 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -16418,58 +16599,7 @@ return zhTw;
 
 
 /***/ }),
-/* 123 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/**
- * BetterDiscord Client Globals
- * Copyright (c) 2015-present JsSucks - https://github.com/JsSucks
- * All rights reserved.
- * https://github.com/JsSucks - https://betterdiscord.net
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree. 
-*/
-
-const { Module } = __webpack_require__(1);
-const { Events } = __webpack_require__(2);
-
-class Global extends Module {
-
-    bindings() {
-        this.first = this.first.bind(this);
-        this.setWS = this.setWS.bind(this);
-        this.getObject = this.getObject.bind(this);
-    }
-
-    first() {
-        if (window.__bd) {
-            this.setState(window.__bd);
-            window.__bd = {
-                setWS: this.setWS
-            };
-            Events.emit('socket-created');
-        }
-    }
-
-    setWS(wSocket) {
-        const state = this.state;
-        state.wsHook = wSocket;
-        this.setState(state);
-        Events.emit('socket-created');
-    }
-
-    getObject(name) {
-        return this.state[name];
-    }
-
-}
-
-const _instance = new Global();
-module.exports = { 'Global': _instance };
-
-/***/ }),
-/* 124 */
+/* 125 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -26729,7 +26859,7 @@ return jQuery;
 
 
 /***/ }),
-/* 125 */
+/* 126 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26745,12 +26875,11 @@ return jQuery;
 
 
 
-const { Logger, Utils, PluginManager, BDIpc, WebpackModules, SocketProxy, Global } = __webpack_require__(126);
+const { Global, Logger, Utils, PluginManager, BDIpc, WebpackModules, SocketProxy } = __webpack_require__(127);
 
 class BetterDiscord {
 
     constructor() {
-        Global.first();
         window.bdUtils = Utils;
         window.wpm = WebpackModules;
     }
@@ -26763,38 +26892,39 @@ if (window.BetterDiscord) {
     let bdInstance = new BetterDiscord();
     window.BetterDiscord = {
         'vendor': {
-            jQuery: __webpack_require__(124),
-            $: __webpack_require__(124),
+            jQuery: __webpack_require__(125),
+            $: __webpack_require__(125),
             moment: __webpack_require__(0)
         }
     };
 }
 
 /***/ }),
-/* 126 */
+/* 127 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__utils__);
-/* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_0__utils__, "Logger")) __webpack_require__.d(__webpack_exports__, "Logger", function() { return __WEBPACK_IMPORTED_MODULE_0__utils__["Logger"]; });
-/* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_0__utils__, "Utils")) __webpack_require__.d(__webpack_exports__, "Utils", function() { return __WEBPACK_IMPORTED_MODULE_0__utils__["Utils"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__pluginmanager__ = __webpack_require__(129);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__pluginmanager___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__pluginmanager__);
-/* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_1__pluginmanager__, "PluginManager")) __webpack_require__.d(__webpack_exports__, "PluginManager", function() { return __WEBPACK_IMPORTED_MODULE_1__pluginmanager__["PluginManager"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__plugin__ = __webpack_require__(130);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__plugin___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__plugin__);
-/* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_2__plugin__, "Pluging")) __webpack_require__.d(__webpack_exports__, "Pluging", function() { return __WEBPACK_IMPORTED_MODULE_2__plugin__["Pluging"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__bdipc__ = __webpack_require__(131);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__bdipc___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__bdipc__);
-/* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_3__bdipc__, "BDIpc")) __webpack_require__.d(__webpack_exports__, "BDIpc", function() { return __WEBPACK_IMPORTED_MODULE_3__bdipc__["BDIpc"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__webpackmodules__ = __webpack_require__(133);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__webpackmodules___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4__webpackmodules__);
-/* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_4__webpackmodules__, "WebpackModules")) __webpack_require__.d(__webpack_exports__, "WebpackModules", function() { return __WEBPACK_IMPORTED_MODULE_4__webpackmodules__["WebpackModules"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__global__ = __webpack_require__(123);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__global___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5__global__);
-/* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_5__global__, "Global")) __webpack_require__.d(__webpack_exports__, "Global", function() { return __WEBPACK_IMPORTED_MODULE_5__global__["Global"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__global__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__global___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__global__);
+/* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_0__global__, "Global")) __webpack_require__.d(__webpack_exports__, "Global", function() { return __WEBPACK_IMPORTED_MODULE_0__global__["Global"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__utils__);
+/* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_1__utils__, "Logger")) __webpack_require__.d(__webpack_exports__, "Logger", function() { return __WEBPACK_IMPORTED_MODULE_1__utils__["Logger"]; });
+/* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_1__utils__, "Utils")) __webpack_require__.d(__webpack_exports__, "Utils", function() { return __WEBPACK_IMPORTED_MODULE_1__utils__["Utils"]; });
+/* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_1__utils__, "FileUtils")) __webpack_require__.d(__webpack_exports__, "FileUtils", function() { return __WEBPACK_IMPORTED_MODULE_1__utils__["FileUtils"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__pluginmanager__ = __webpack_require__(132);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__pluginmanager___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__pluginmanager__);
+/* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_2__pluginmanager__, "PluginManager")) __webpack_require__.d(__webpack_exports__, "PluginManager", function() { return __WEBPACK_IMPORTED_MODULE_2__pluginmanager__["PluginManager"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__plugin__ = __webpack_require__(133);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__plugin___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__plugin__);
+/* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_3__plugin__, "Pluging")) __webpack_require__.d(__webpack_exports__, "Pluging", function() { return __WEBPACK_IMPORTED_MODULE_3__plugin__["Pluging"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__bdipc__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__bdipc___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4__bdipc__);
+/* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_4__bdipc__, "BDIpc")) __webpack_require__.d(__webpack_exports__, "BDIpc", function() { return __WEBPACK_IMPORTED_MODULE_4__bdipc__["BDIpc"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__webpackmodules__ = __webpack_require__(134);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__webpackmodules___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5__webpackmodules__);
+/* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_5__webpackmodules__, "WebpackModules")) __webpack_require__.d(__webpack_exports__, "WebpackModules", function() { return __WEBPACK_IMPORTED_MODULE_5__webpackmodules__["WebpackModules"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__events__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__events___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6__events__);
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_6__events__, "Events")) __webpack_require__.d(__webpack_exports__, "Events", function() { return __WEBPACK_IMPORTED_MODULE_6__events__["Events"]; });
@@ -26811,480 +26941,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 /***/ }),
-/* 127 */
-/***/ (function(module, exports) {
-
-module.exports = function(module) {
-	if(!module.webpackPolyfill) {
-		module.deprecate = function() {};
-		module.paths = [];
-		// module.parent = undefined by default
-		if(!module.children) module.children = [];
-		Object.defineProperty(module, "loaded", {
-			enumerable: true,
-			get: function() {
-				return module.l;
-			}
-		});
-		Object.defineProperty(module, "id", {
-			enumerable: true,
-			get: function() {
-				return module.i;
-			}
-		});
-		module.webpackPolyfill = 1;
-	}
-	return module;
-};
-
-
-/***/ }),
 /* 128 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var map = {
-	"./af": 4,
-	"./af.js": 4,
-	"./ar": 5,
-	"./ar-dz": 6,
-	"./ar-dz.js": 6,
-	"./ar-kw": 7,
-	"./ar-kw.js": 7,
-	"./ar-ly": 8,
-	"./ar-ly.js": 8,
-	"./ar-ma": 9,
-	"./ar-ma.js": 9,
-	"./ar-sa": 10,
-	"./ar-sa.js": 10,
-	"./ar-tn": 11,
-	"./ar-tn.js": 11,
-	"./ar.js": 5,
-	"./az": 12,
-	"./az.js": 12,
-	"./be": 13,
-	"./be.js": 13,
-	"./bg": 14,
-	"./bg.js": 14,
-	"./bm": 15,
-	"./bm.js": 15,
-	"./bn": 16,
-	"./bn.js": 16,
-	"./bo": 17,
-	"./bo.js": 17,
-	"./br": 18,
-	"./br.js": 18,
-	"./bs": 19,
-	"./bs.js": 19,
-	"./ca": 20,
-	"./ca.js": 20,
-	"./cs": 21,
-	"./cs.js": 21,
-	"./cv": 22,
-	"./cv.js": 22,
-	"./cy": 23,
-	"./cy.js": 23,
-	"./da": 24,
-	"./da.js": 24,
-	"./de": 25,
-	"./de-at": 26,
-	"./de-at.js": 26,
-	"./de-ch": 27,
-	"./de-ch.js": 27,
-	"./de.js": 25,
-	"./dv": 28,
-	"./dv.js": 28,
-	"./el": 29,
-	"./el.js": 29,
-	"./en-au": 30,
-	"./en-au.js": 30,
-	"./en-ca": 31,
-	"./en-ca.js": 31,
-	"./en-gb": 32,
-	"./en-gb.js": 32,
-	"./en-ie": 33,
-	"./en-ie.js": 33,
-	"./en-nz": 34,
-	"./en-nz.js": 34,
-	"./eo": 35,
-	"./eo.js": 35,
-	"./es": 36,
-	"./es-do": 37,
-	"./es-do.js": 37,
-	"./es-us": 38,
-	"./es-us.js": 38,
-	"./es.js": 36,
-	"./et": 39,
-	"./et.js": 39,
-	"./eu": 40,
-	"./eu.js": 40,
-	"./fa": 41,
-	"./fa.js": 41,
-	"./fi": 42,
-	"./fi.js": 42,
-	"./fo": 43,
-	"./fo.js": 43,
-	"./fr": 44,
-	"./fr-ca": 45,
-	"./fr-ca.js": 45,
-	"./fr-ch": 46,
-	"./fr-ch.js": 46,
-	"./fr.js": 44,
-	"./fy": 47,
-	"./fy.js": 47,
-	"./gd": 48,
-	"./gd.js": 48,
-	"./gl": 49,
-	"./gl.js": 49,
-	"./gom-latn": 50,
-	"./gom-latn.js": 50,
-	"./gu": 51,
-	"./gu.js": 51,
-	"./he": 52,
-	"./he.js": 52,
-	"./hi": 53,
-	"./hi.js": 53,
-	"./hr": 54,
-	"./hr.js": 54,
-	"./hu": 55,
-	"./hu.js": 55,
-	"./hy-am": 56,
-	"./hy-am.js": 56,
-	"./id": 57,
-	"./id.js": 57,
-	"./is": 58,
-	"./is.js": 58,
-	"./it": 59,
-	"./it.js": 59,
-	"./ja": 60,
-	"./ja.js": 60,
-	"./jv": 61,
-	"./jv.js": 61,
-	"./ka": 62,
-	"./ka.js": 62,
-	"./kk": 63,
-	"./kk.js": 63,
-	"./km": 64,
-	"./km.js": 64,
-	"./kn": 65,
-	"./kn.js": 65,
-	"./ko": 66,
-	"./ko.js": 66,
-	"./ky": 67,
-	"./ky.js": 67,
-	"./lb": 68,
-	"./lb.js": 68,
-	"./lo": 69,
-	"./lo.js": 69,
-	"./lt": 70,
-	"./lt.js": 70,
-	"./lv": 71,
-	"./lv.js": 71,
-	"./me": 72,
-	"./me.js": 72,
-	"./mi": 73,
-	"./mi.js": 73,
-	"./mk": 74,
-	"./mk.js": 74,
-	"./ml": 75,
-	"./ml.js": 75,
-	"./mr": 76,
-	"./mr.js": 76,
-	"./ms": 77,
-	"./ms-my": 78,
-	"./ms-my.js": 78,
-	"./ms.js": 77,
-	"./mt": 79,
-	"./mt.js": 79,
-	"./my": 80,
-	"./my.js": 80,
-	"./nb": 81,
-	"./nb.js": 81,
-	"./ne": 82,
-	"./ne.js": 82,
-	"./nl": 83,
-	"./nl-be": 84,
-	"./nl-be.js": 84,
-	"./nl.js": 83,
-	"./nn": 85,
-	"./nn.js": 85,
-	"./pa-in": 86,
-	"./pa-in.js": 86,
-	"./pl": 87,
-	"./pl.js": 87,
-	"./pt": 88,
-	"./pt-br": 89,
-	"./pt-br.js": 89,
-	"./pt.js": 88,
-	"./ro": 90,
-	"./ro.js": 90,
-	"./ru": 91,
-	"./ru.js": 91,
-	"./sd": 92,
-	"./sd.js": 92,
-	"./se": 93,
-	"./se.js": 93,
-	"./si": 94,
-	"./si.js": 94,
-	"./sk": 95,
-	"./sk.js": 95,
-	"./sl": 96,
-	"./sl.js": 96,
-	"./sq": 97,
-	"./sq.js": 97,
-	"./sr": 98,
-	"./sr-cyrl": 99,
-	"./sr-cyrl.js": 99,
-	"./sr.js": 98,
-	"./ss": 100,
-	"./ss.js": 100,
-	"./sv": 101,
-	"./sv.js": 101,
-	"./sw": 102,
-	"./sw.js": 102,
-	"./ta": 103,
-	"./ta.js": 103,
-	"./te": 104,
-	"./te.js": 104,
-	"./tet": 105,
-	"./tet.js": 105,
-	"./th": 106,
-	"./th.js": 106,
-	"./tl-ph": 107,
-	"./tl-ph.js": 107,
-	"./tlh": 108,
-	"./tlh.js": 108,
-	"./tr": 109,
-	"./tr.js": 109,
-	"./tzl": 110,
-	"./tzl.js": 110,
-	"./tzm": 111,
-	"./tzm-latn": 112,
-	"./tzm-latn.js": 112,
-	"./tzm.js": 111,
-	"./uk": 113,
-	"./uk.js": 113,
-	"./ur": 114,
-	"./ur.js": 114,
-	"./uz": 115,
-	"./uz-latn": 116,
-	"./uz-latn.js": 116,
-	"./uz.js": 115,
-	"./vi": 117,
-	"./vi.js": 117,
-	"./x-pseudo": 118,
-	"./x-pseudo.js": 118,
-	"./yo": 119,
-	"./yo.js": 119,
-	"./zh-cn": 120,
-	"./zh-cn.js": 120,
-	"./zh-hk": 121,
-	"./zh-hk.js": 121,
-	"./zh-tw": 122,
-	"./zh-tw.js": 122
-};
-function webpackContext(req) {
-	return __webpack_require__(webpackContextResolve(req));
-};
-function webpackContextResolve(req) {
-	var id = map[req];
-	if(!(id + 1)) // check for number or string
-		throw new Error("Cannot find module '" + req + "'.");
-	return id;
-};
-webpackContext.keys = function webpackContextKeys() {
-	return Object.keys(map);
-};
-webpackContext.resolve = webpackContextResolve;
-module.exports = webpackContext;
-webpackContext.id = 128;
-
-/***/ }),
-/* 129 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/**
- * BetterDiscord Plugin Manager
- * Copyright (c) 2015-present JsSucks - https://github.com/JsSucks
- * All rights reserved.
- * https://github.com/JsSucks - https://betterdiscord.net
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree. 
-*/
-
-const { Module } = __webpack_require__(1);
-
-class PluginManager extends Module {
-
-    setInitialState() {
-        this.setState({
-            plugins: []
-        });
-    }
-
-    get plugins() {
-        return this.state.plugins;
-    }
-
-    loadPlugin(plugin) {
-        const { plugins } = this;
-        plugins.push(plugin);
-        this.setState({
-            plugins
-        });
-    }
-
-    getPluginByName(name) {
-        return this.plugins.find(plugin => plugin.name === name);
-    }
-
-    getPluginById(id) {
-        return this.plugins.find(plugin => plugin.id === id);
-    }
-
-}
-
-const _instance = new PluginManager();
-
-module.exports = { PluginManager: _instance };
-
-/***/ }),
-/* 130 */
-/***/ (function(module, exports) {
-
-/**
- * BetterDiscord Plugin Base Class
- * Copyright (c) 2015-present JsSucks - https://github.com/JsSucks
- * All rights reserved.
- * https://github.com/JsSucks - https://betterdiscord.net
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree. 
-*/
-
-class Plugin {
-
-  constructor() {}
-
-}
-
-module.exports = { Plugin };
-
-/***/ }),
-/* 131 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/**
- * BetterDiscord Client IPC Module
- * Copyright (c) 2015-present JsSucks - https://github.com/JsSucks
- * All rights reserved.
- * https://github.com/JsSucks - https://betterdiscord.net
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree. 
-*/
-
-const { ipcRenderer } = __webpack_require__(132);
-
-class BDIpc {
-
-    static async send(channel, message) {
-        channel = channel.startsWith('bd-') ? channel : `bd-${channel}`;
-        const __eid = Date.now().toString();
-        ipcRenderer.send(channel, Object.assign(message ? message : {}, { __eid }));
-        return new Promise((resolve, reject) => {
-            ipcRenderer.once(__eid, (event, arg) => resolve(arg));
-        });
-    }
-
-}
-
-module.exports = { BDIpc };
-
-/***/ }),
-/* 132 */
-/***/ (function(module, exports) {
-
-module.exports = window.require("electron");
-
-/***/ }),
-/* 133 */
-/***/ (function(module, exports) {
-
-/**
- * BetterDiscord Client WebpackModules Module
- * Copyright (c) 2015-present JsSucks - https://github.com/JsSucks
- * All rights reserved.
- * https://github.com/JsSucks - https://betterdiscord.net
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree. 
-*/
-
-class WebpackModules {
-
-    static async getModuleByProps(props) {
-        const modules = await this.getAllModules();
-        return new Promise((resolve, reject) => {
-            const rm = [];
-            for (let index in modules) {
-                if (!modules.hasOwnProperty(index)) continue;
-                const module = modules[index];
-                const { exports } = module;
-
-                if (!exports || typeof exports !== 'object') continue;
-                if (!(props in exports)) continue;
-                rm.push(module);
-                // resolve(module);
-                // break;
-            }
-            resolve(rm);
-            reject(null);
-        });
-    }
-
-    /*This will most likely not work for most modules*/
-    static async getModuleByName(name) {
-        const modules = await this.getAllModules();
-        return new Promise((resolve, reject) => {
-            for (let index in modules) {
-                if (!modules.hasOwnProperty(index)) continue;
-                const module = modules[index];
-                const { exports } = module;
-                if (!exports) continue;
-
-                if (typeof exports === 'object' && (name in exports || exports.name === name)) {
-                    resolve(module.exports);
-                    break;
-                } else if (typeof exports === 'function' && exports.name === name) {
-                    resolve(module.exports);
-                    break;
-                }
-            }
-
-            reject(null);
-        });
-    }
-
-    static async getAllModules() {
-        return new Promise(resolve => {
-            const id = 'bd-webpackmodules';
-            window['webpackJsonp']([], {
-                [id]: (module, exports, __webpack_require__) => {
-                    delete __webpack_require__.c[id];
-                    delete __webpack_require__.m[id];
-                    resolve(__webpack_require__.c);
-                }
-            }, [id]);
-        });
-    }
-
-}
-
-module.exports = { WebpackModules };
-
-/***/ }),
-/* 134 */
 /***/ (function(module, exports) {
 
 // Copyright Joyent, Inc. and other Node contributors.
@@ -27592,6 +27249,453 @@ function isUndefined(arg) {
 
 
 /***/ }),
+/* 129 */
+/***/ (function(module, exports) {
+
+module.exports = window.require("electron");
+
+/***/ }),
+/* 130 */
+/***/ (function(module, exports) {
+
+module.exports = function(module) {
+	if(!module.webpackPolyfill) {
+		module.deprecate = function() {};
+		module.paths = [];
+		// module.parent = undefined by default
+		if(!module.children) module.children = [];
+		Object.defineProperty(module, "loaded", {
+			enumerable: true,
+			get: function() {
+				return module.l;
+			}
+		});
+		Object.defineProperty(module, "id", {
+			enumerable: true,
+			get: function() {
+				return module.i;
+			}
+		});
+		module.webpackPolyfill = 1;
+	}
+	return module;
+};
+
+
+/***/ }),
+/* 131 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var map = {
+	"./af": 6,
+	"./af.js": 6,
+	"./ar": 7,
+	"./ar-dz": 8,
+	"./ar-dz.js": 8,
+	"./ar-kw": 9,
+	"./ar-kw.js": 9,
+	"./ar-ly": 10,
+	"./ar-ly.js": 10,
+	"./ar-ma": 11,
+	"./ar-ma.js": 11,
+	"./ar-sa": 12,
+	"./ar-sa.js": 12,
+	"./ar-tn": 13,
+	"./ar-tn.js": 13,
+	"./ar.js": 7,
+	"./az": 14,
+	"./az.js": 14,
+	"./be": 15,
+	"./be.js": 15,
+	"./bg": 16,
+	"./bg.js": 16,
+	"./bm": 17,
+	"./bm.js": 17,
+	"./bn": 18,
+	"./bn.js": 18,
+	"./bo": 19,
+	"./bo.js": 19,
+	"./br": 20,
+	"./br.js": 20,
+	"./bs": 21,
+	"./bs.js": 21,
+	"./ca": 22,
+	"./ca.js": 22,
+	"./cs": 23,
+	"./cs.js": 23,
+	"./cv": 24,
+	"./cv.js": 24,
+	"./cy": 25,
+	"./cy.js": 25,
+	"./da": 26,
+	"./da.js": 26,
+	"./de": 27,
+	"./de-at": 28,
+	"./de-at.js": 28,
+	"./de-ch": 29,
+	"./de-ch.js": 29,
+	"./de.js": 27,
+	"./dv": 30,
+	"./dv.js": 30,
+	"./el": 31,
+	"./el.js": 31,
+	"./en-au": 32,
+	"./en-au.js": 32,
+	"./en-ca": 33,
+	"./en-ca.js": 33,
+	"./en-gb": 34,
+	"./en-gb.js": 34,
+	"./en-ie": 35,
+	"./en-ie.js": 35,
+	"./en-nz": 36,
+	"./en-nz.js": 36,
+	"./eo": 37,
+	"./eo.js": 37,
+	"./es": 38,
+	"./es-do": 39,
+	"./es-do.js": 39,
+	"./es-us": 40,
+	"./es-us.js": 40,
+	"./es.js": 38,
+	"./et": 41,
+	"./et.js": 41,
+	"./eu": 42,
+	"./eu.js": 42,
+	"./fa": 43,
+	"./fa.js": 43,
+	"./fi": 44,
+	"./fi.js": 44,
+	"./fo": 45,
+	"./fo.js": 45,
+	"./fr": 46,
+	"./fr-ca": 47,
+	"./fr-ca.js": 47,
+	"./fr-ch": 48,
+	"./fr-ch.js": 48,
+	"./fr.js": 46,
+	"./fy": 49,
+	"./fy.js": 49,
+	"./gd": 50,
+	"./gd.js": 50,
+	"./gl": 51,
+	"./gl.js": 51,
+	"./gom-latn": 52,
+	"./gom-latn.js": 52,
+	"./gu": 53,
+	"./gu.js": 53,
+	"./he": 54,
+	"./he.js": 54,
+	"./hi": 55,
+	"./hi.js": 55,
+	"./hr": 56,
+	"./hr.js": 56,
+	"./hu": 57,
+	"./hu.js": 57,
+	"./hy-am": 58,
+	"./hy-am.js": 58,
+	"./id": 59,
+	"./id.js": 59,
+	"./is": 60,
+	"./is.js": 60,
+	"./it": 61,
+	"./it.js": 61,
+	"./ja": 62,
+	"./ja.js": 62,
+	"./jv": 63,
+	"./jv.js": 63,
+	"./ka": 64,
+	"./ka.js": 64,
+	"./kk": 65,
+	"./kk.js": 65,
+	"./km": 66,
+	"./km.js": 66,
+	"./kn": 67,
+	"./kn.js": 67,
+	"./ko": 68,
+	"./ko.js": 68,
+	"./ky": 69,
+	"./ky.js": 69,
+	"./lb": 70,
+	"./lb.js": 70,
+	"./lo": 71,
+	"./lo.js": 71,
+	"./lt": 72,
+	"./lt.js": 72,
+	"./lv": 73,
+	"./lv.js": 73,
+	"./me": 74,
+	"./me.js": 74,
+	"./mi": 75,
+	"./mi.js": 75,
+	"./mk": 76,
+	"./mk.js": 76,
+	"./ml": 77,
+	"./ml.js": 77,
+	"./mr": 78,
+	"./mr.js": 78,
+	"./ms": 79,
+	"./ms-my": 80,
+	"./ms-my.js": 80,
+	"./ms.js": 79,
+	"./mt": 81,
+	"./mt.js": 81,
+	"./my": 82,
+	"./my.js": 82,
+	"./nb": 83,
+	"./nb.js": 83,
+	"./ne": 84,
+	"./ne.js": 84,
+	"./nl": 85,
+	"./nl-be": 86,
+	"./nl-be.js": 86,
+	"./nl.js": 85,
+	"./nn": 87,
+	"./nn.js": 87,
+	"./pa-in": 88,
+	"./pa-in.js": 88,
+	"./pl": 89,
+	"./pl.js": 89,
+	"./pt": 90,
+	"./pt-br": 91,
+	"./pt-br.js": 91,
+	"./pt.js": 90,
+	"./ro": 92,
+	"./ro.js": 92,
+	"./ru": 93,
+	"./ru.js": 93,
+	"./sd": 94,
+	"./sd.js": 94,
+	"./se": 95,
+	"./se.js": 95,
+	"./si": 96,
+	"./si.js": 96,
+	"./sk": 97,
+	"./sk.js": 97,
+	"./sl": 98,
+	"./sl.js": 98,
+	"./sq": 99,
+	"./sq.js": 99,
+	"./sr": 100,
+	"./sr-cyrl": 101,
+	"./sr-cyrl.js": 101,
+	"./sr.js": 100,
+	"./ss": 102,
+	"./ss.js": 102,
+	"./sv": 103,
+	"./sv.js": 103,
+	"./sw": 104,
+	"./sw.js": 104,
+	"./ta": 105,
+	"./ta.js": 105,
+	"./te": 106,
+	"./te.js": 106,
+	"./tet": 107,
+	"./tet.js": 107,
+	"./th": 108,
+	"./th.js": 108,
+	"./tl-ph": 109,
+	"./tl-ph.js": 109,
+	"./tlh": 110,
+	"./tlh.js": 110,
+	"./tr": 111,
+	"./tr.js": 111,
+	"./tzl": 112,
+	"./tzl.js": 112,
+	"./tzm": 113,
+	"./tzm-latn": 114,
+	"./tzm-latn.js": 114,
+	"./tzm.js": 113,
+	"./uk": 115,
+	"./uk.js": 115,
+	"./ur": 116,
+	"./ur.js": 116,
+	"./uz": 117,
+	"./uz-latn": 118,
+	"./uz-latn.js": 118,
+	"./uz.js": 117,
+	"./vi": 119,
+	"./vi.js": 119,
+	"./x-pseudo": 120,
+	"./x-pseudo.js": 120,
+	"./yo": 121,
+	"./yo.js": 121,
+	"./zh-cn": 122,
+	"./zh-cn.js": 122,
+	"./zh-hk": 123,
+	"./zh-hk.js": 123,
+	"./zh-tw": 124,
+	"./zh-tw.js": 124
+};
+function webpackContext(req) {
+	return __webpack_require__(webpackContextResolve(req));
+};
+function webpackContextResolve(req) {
+	var id = map[req];
+	if(!(id + 1)) // check for number or string
+		throw new Error("Cannot find module '" + req + "'.");
+	return id;
+};
+webpackContext.keys = function webpackContextKeys() {
+	return Object.keys(map);
+};
+webpackContext.resolve = webpackContextResolve;
+module.exports = webpackContext;
+webpackContext.id = 131;
+
+/***/ }),
+/* 132 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/**
+ * BetterDiscord Plugin Manager
+ * Copyright (c) 2015-present JsSucks - https://github.com/JsSucks
+ * All rights reserved.
+ * https://github.com/JsSucks - https://betterdiscord.net
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree. 
+*/
+
+const { Module } = __webpack_require__(1);
+
+class PluginManager extends Module {
+
+    constructor(args) {
+        super(args);
+        console.log("PLUGIN MANGER!");
+    }
+
+    setInitialState() {
+        this.setState({
+            plugins: []
+        });
+    }
+
+    get plugins() {
+        return this.state.plugins;
+    }
+
+    loadPlugin(plugin) {
+        const { plugins } = this;
+        plugins.push(plugin);
+        this.setState({
+            plugins
+        });
+    }
+
+    getPluginByName(name) {
+        return this.plugins.find(plugin => plugin.name === name);
+    }
+
+    getPluginById(id) {
+        return this.plugins.find(plugin => plugin.id === id);
+    }
+
+}
+
+const _instance = new PluginManager();
+
+module.exports = { PluginManager: _instance };
+
+/***/ }),
+/* 133 */
+/***/ (function(module, exports) {
+
+/**
+ * BetterDiscord Plugin Base Class
+ * Copyright (c) 2015-present JsSucks - https://github.com/JsSucks
+ * All rights reserved.
+ * https://github.com/JsSucks - https://betterdiscord.net
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree. 
+*/
+
+class Plugin {
+
+  constructor() {}
+
+}
+
+module.exports = { Plugin };
+
+/***/ }),
+/* 134 */
+/***/ (function(module, exports) {
+
+/**
+ * BetterDiscord Client WebpackModules Module
+ * Copyright (c) 2015-present JsSucks - https://github.com/JsSucks
+ * All rights reserved.
+ * https://github.com/JsSucks - https://betterdiscord.net
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree. 
+*/
+
+class WebpackModules {
+
+    static async getModuleByProps(props) {
+        const modules = await this.getAllModules();
+        return new Promise((resolve, reject) => {
+            const rm = [];
+            for (let index in modules) {
+                if (!modules.hasOwnProperty(index)) continue;
+                const module = modules[index];
+                const { exports } = module;
+
+                if (!exports || typeof exports !== 'object') continue;
+                if (!(props in exports)) continue;
+                rm.push(module);
+                // resolve(module);
+                // break;
+            }
+            resolve(rm);
+            reject(null);
+        });
+    }
+
+    /*This will most likely not work for most modules*/
+    static async getModuleByName(name) {
+        const modules = await this.getAllModules();
+        return new Promise((resolve, reject) => {
+            for (let index in modules) {
+                if (!modules.hasOwnProperty(index)) continue;
+                const module = modules[index];
+                const { exports } = module;
+                if (!exports) continue;
+
+                if (typeof exports === 'object' && (name in exports || exports.name === name)) {
+                    resolve(module.exports);
+                    break;
+                } else if (typeof exports === 'function' && exports.name === name) {
+                    resolve(module.exports);
+                    break;
+                }
+            }
+
+            reject(null);
+        });
+    }
+
+    static async getAllModules() {
+        return new Promise(resolve => {
+            const id = 'bd-webpackmodules';
+            window['webpackJsonp']([], {
+                [id]: (module, exports, __webpack_require__) => {
+                    delete __webpack_require__.c[id];
+                    delete __webpack_require__.m[id];
+                    resolve(__webpack_require__.c);
+                }
+            }, [id]);
+        });
+    }
+
+}
+
+module.exports = { WebpackModules };
+
+/***/ }),
 /* 135 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -27607,8 +27711,8 @@ function isUndefined(arg) {
 
 const { Events } = __webpack_require__(2);
 const { Module } = __webpack_require__(1);
-const { Global } = __webpack_require__(123);
-const { Utils } = __webpack_require__(3);
+const { Global } = __webpack_require__(3);
+const { Utils } = __webpack_require__(5);
 
 class SocketProxy extends Module {
 

@@ -10,6 +10,8 @@
 
 const { Module } = require('./modulebase');
 const moment = require('moment');
+const fs = window.require('fs');
+const path = window.require('path');
 
 const logs = [];
 

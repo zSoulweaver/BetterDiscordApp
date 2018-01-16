@@ -11,6 +11,7 @@
 const { Module } = require('./modulebase');
 const { BDIpc } = require('./bdipc');
 const { Utils, FileUtils } = require('./utils');
+const { Global } = require('./global');
 const fs = window.require('fs');
 const path = window.require('path');
 
@@ -47,17 +48,15 @@ class PluginManager extends Module {
         return this.state.plugins;
     }
 
-    async pluginsPath() {
-        //TODO Get this from config module
-        const config = await BDIpc.send('getConfig');
-        return config.paths.find(path => 'plugins' in path).plugins;
+    pluginsPath() {
+        return Global.getObject('paths').find(path => path.id === 'plugins').path;
     }
 
     async loadPlugin(pluginPath) {
         const { plugins } = this.state;
 
         try {
-            const pluginsPath = await this.pluginsPath();
+            const pluginsPath = this.pluginsPath();
             pluginPath = path.join(pluginsPath, pluginPath);
 
             const loaded = plugins.find(plugin => plugin.pluginPath === pluginPath);

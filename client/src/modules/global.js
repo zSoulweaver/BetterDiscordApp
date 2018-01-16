@@ -10,8 +10,14 @@
 
 const { Module } = require('./modulebase');
 const { Events } = require('./events');
+const { BDIpc } = require('./bdipc');
 
 class Global extends Module {
+
+    constructor(args) {
+        super(args);
+        this.first();
+    }
 
     bindings() {
         this.first = this.first.bind(this);
@@ -20,6 +26,11 @@ class Global extends Module {
     }
 
     first() {
+        (async () => {
+            const config = await BDIpc.send('getConfig');
+            this.setState(config);
+        })();
+
         if (window.__bd) {
             this.setState(window.__bd);
             window.__bd = {

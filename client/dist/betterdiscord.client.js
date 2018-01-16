@@ -27146,6 +27146,7 @@ webpackContext.id = 129;
 const { Module } = __webpack_require__(1);
 const { BDIpc } = __webpack_require__(123);
 const fs = window.require('fs');
+const path = window.require('path');
 
 //TODO add these to actual utils
 class Utils {
@@ -27241,9 +27242,24 @@ class FileUtils {
     }
 }
 
+class Plugin {
+
+    constructor(args) {}
+
+    start() {
+        if (this.onStart) return this.onStart();
+    }
+
+    stop() {
+        if (this.onStop) return this.onStop();
+    }
+
+}
+
 class PluginManager extends Module {
 
     setInitialState() {
+        window.pm = this;
         this.setState({
             plugins: []
         });
@@ -27254,12 +27270,33 @@ class PluginManager extends Module {
         return this.state.plugins;
     }
 
-    loadPlugin(plugin) {
+    async loadPlugin(pluginPath) {
         const { plugins } = this.state;
-        plugins.push(plugin);
-        this.setState({
-            plugins
-        });
+
+        try {
+            const loaded = plugins.find(plugin => plugin.pluginPath === pluginPath);
+            if (loaded) {
+                throw { 'message': 'Attempted to load an already loaded plugin' };
+            }
+
+            const readConfig = await this.readConfig(pluginPath);
+
+            const mainPath = path.join(pluginPath, readConfig.main);
+
+            const plugin = window.require(mainPath)(Plugin, {}, {});
+            const instance = new plugin();
+
+            plugins.push(Object.assign({
+                pluginPath,
+                instance
+            }, readConfig));
+
+            this.setState(plugins);
+
+            return instance;
+        } catch (err) {
+            throw err;
+        }
     }
 
     getPluginByName(name) {
@@ -27268,6 +27305,18 @@ class PluginManager extends Module {
 
     getPluginById(id) {
         return this.plugins.find(plugin => plugin.id === id);
+    }
+
+    stopPlugin(name) {
+        const plugin = this.getPluginByName(name);
+        if (plugin && plugin.instance) return plugin.instance.stop();
+        return null;
+    }
+
+    startPlugin(name) {
+        const plugin = this.getPluginByName(name);
+        if (plugin && plugin.instance) return plugin.instance.start();
+        return null;
     }
 
     async readConfig(path) {
@@ -27281,19 +27330,30 @@ const _instance = new PluginManager();
 
 async function tests() {
 
+    const pluginName = 'Example';
     const config = await BDIpc.send('getConfig');
     const pluginPath = config.paths.find(path => 'plugins' in path).plugins;
-    console.log(`Plugin Path: ${pluginPath}`);
+    try {
+        const plugin = await _instance.loadPlugin(path.join(pluginPath, pluginName));
+        const plugin2 = await _instance.loadPlugin(path.join(pluginPath, pluginName));
+        window.pl = plugin;
+    } catch (err) {
+        console.log(`Failed to load plugin! ${err.message}`);
+    }
 
-    const examplePluginPath = `${pluginPath}/Example`;
+    // const config = await BDIpc.send('getConfig');
+    //  const pluginPath = config.paths.find(path => 'plugins' in path).plugins;
+
+    // const examplePluginPath = path.join(pluginPath, pluginName);
 
     //Test read config
-    try {
+    /*try {
         const readConfig = await _instance.readConfig(examplePluginPath);
         console.log(readConfig);
-    } catch (err) {
+          window.testPlugin = window.require(path.join(examplePluginPath, readConfig.main));
+      } catch (err) {
         console.log(err);
-    }
+    }*/
 }
 
 module.exports = { PluginManager: _instance };

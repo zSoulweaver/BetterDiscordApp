@@ -25,6 +25,7 @@
     "jquery": "^3.2.1"
   },
   "scripts": {
-    "build":  "webpack --progress --colors" 
+    "build": "webpack --progress --colors",
+    "watch": "webpack --progress --colors --watch"
   } 
 }

@@ -27564,7 +27564,53 @@ const path = window.require('path');
 
 class Plugin {
 
-    constructor(args) {}
+    constructor(args) {
+        this._args = args;
+    }
+
+    get configs() {
+        return this._args.configs;
+    }
+
+    get defaultConfig() {
+        return this.configs.defaultConfig;
+    }
+
+    get userConfig() {
+        return this.configs.userConfig;
+    }
+
+    get info() {
+        return this._args.info;
+    }
+
+    get name() {
+        return this.info.name;
+    }
+
+    get authors() {
+        return this.info.authors;
+    }
+
+    get version() {
+        return this.info.version;
+    }
+
+    get paths() {
+        return this._args.paths;
+    }
+
+    get pluginPath() {
+        return this.paths.pluginPath;
+    }
+
+    get main() {
+        return this._args.main;
+    }
+
+    get enabled() {
+        return this.userConfig.enabled;
+    }
 
     start() {
         if (this.onStart) return this.onStart();
@@ -27610,17 +27656,28 @@ class PluginManager extends Module {
             const readConfig = await this.readConfig(pluginPath);
             const mainPath = path.join(pluginPath, readConfig.main);
 
-            const plugin = window.require(mainPath)(Plugin, {}, {});
-            const instance = new plugin();
+            //TODO Read plugin user config and call onStart if enabled
+            const userConfigPath = path.join(pluginPath, 'user.config.json');
 
-            plugins.push(Object.assign({
-                pluginPath,
-                instance
-            }, readConfig));
+            let userConfig = readConfig.defaultConfig;
+            try {
+                const readUserConfig = await FileUtils.readJsonFromFile(userConfigPath);
+                userConfig = Object.assign(userConfig, readUserConfig);
+            } catch (err) {/*We don't care if this fails it either means that user config doesn't exist or there's something wrong with it so we revert to default config*/}
+
+            const configs = {
+                defaultConfig: readConfig.defaultConfig,
+                userConfig
+            };
+
+            const plugin = window.require(mainPath)(Plugin, {}, {});
+            const instance = new plugin({ configs, info: readConfig.info, main: readConfig.main, paths: { pluginPath } });
+
+            if (instance.enabled) instance.start();
+
+            plugins.push(instance);
 
             this.setState(plugins);
-
-            //TODO Read plugin user config and call onStart if enabled
 
             return instance;
         } catch (err) {

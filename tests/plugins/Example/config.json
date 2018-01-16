@@ -1,6 +1,11 @@
 {
-  "name": "Example Plugin",
-  "authors": [ "Jiiks" ],
-  "version": 1.0,
-  "main":  "index.js" 
+  "info": {
+    "name": "Example Plugin",
+    "authors": ["Jiiks"],
+    "version": 1.0
+  },
+  "main": "index.js",
+  "defaultConfig": {
+    "foo": "bar"
+  }
 }

@@ -27260,15 +27260,24 @@ class PluginManager extends Module {
         this.setState({
             plugins: []
         });
-        tests();
+        // tests();
     }
 
     get plugins() {
         return this.state.plugins;
     }
 
+    async pluginsPath() {
+        //TODO Get this from config module
+        const config = await BDIpc.send('getConfig');
+        return config.paths.find(path => 'plugins' in path).plugins;
+    }
+
     async loadPlugin(pluginPath) {
         const { plugins } = this.state;
+        const pluginsPath = await this.pluginsPath();
+
+        pluginPath = path.join(pluginsPath, pluginPath);
 
         try {
 

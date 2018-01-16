@@ -47,10 +47,18 @@ class PluginManager extends Module {
         return this.state.plugins;
     }
 
+    async pluginsPath() {
+        //TODO Get this from config module
+        const config = await BDIpc.send('getConfig');
+        return config.paths.find(path => 'plugins' in path).plugins;
+    }
+
     async loadPlugin(pluginPath) {
         const { plugins } = this.state;
 
         try {
+            const pluginsPath = await this.pluginsPath();
+            pluginPath = path.join(pluginsPath, pluginPath);
 
             const loaded = plugins.find(plugin => plugin.pluginPath === pluginPath);
             if (loaded) {
@@ -66,9 +74,11 @@ class PluginManager extends Module {
             plugins.push(Object.assign({
                 pluginPath,
                 instance
-            },readConfig));
+            }, readConfig));
 
             this.setState(plugins);
+
+            //TODO Read plugin user config and call onStart if enabled
 
             return instance;
         } catch (err) {
@@ -108,13 +118,12 @@ const _instance = new PluginManager();
 async function tests() {
 
     const pluginName = 'Example';
-    const config = await BDIpc.send('getConfig');
-    const pluginPath = config.paths.find(path => 'plugins' in path).plugins;
+
     try {
         //Load test plugin
-        const plugin = await _instance.loadPlugin(path.join(pluginPath, pluginName));
+        const plugin = await _instance.loadPlugin(pluginName);
         //Attempt to load the same plugin again
-        const plugin2 = await _instance.loadPlugin(path.join(pluginPath, pluginName));
+        const plugin2 = await _instance.loadPlugin(pluginName);
     } catch (err) {
         console.log(`Failed to load plugin! ${err.message}`);
     }

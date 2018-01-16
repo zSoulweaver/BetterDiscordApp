@@ -1,4 +1,4 @@
-export { Logger, Utils } from './utils';
+export { Logger, Utils, FileUtils } from './utils';
 export { PluginManager } from './pluginmanager';
 export { Pluging } from './plugin';
 export { BDIpc } from './bdipc';

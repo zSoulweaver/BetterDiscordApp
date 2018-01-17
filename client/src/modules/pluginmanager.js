@@ -106,9 +106,8 @@ class PluginManager extends Module {
 
     async reloadPlugin(plugin) {
         let _plugin = this.getPluginByName(plugin);
-        if (!_plugin) _plugin = this.plugins.find(plugin => plugin.pluginPath === plugin);
+        if (!_plugin) _plugin = this.plugins.find(plugin => plugin.pluginPath === plugin || plugin.dirName === plugin);
         if (!_plugin) throw { 'message': 'Attempted to reload a plugin that is not loaded?' };
-        window.rp = _plugin;
         if (!_plugin.stop()) throw { 'message': 'Plugin failed to stop!' };
         const index = this.plugins.findIndex(plugin => plugin === _plugin);
         const { pluginPath, dirName } = _plugin;

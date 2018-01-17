@@ -105,11 +105,10 @@ class PluginManager extends Module {
     }
 
     async reloadPlugin(plugin) {
-        let _plugin = this.getPluginByName(plugin);
-        if (!_plugin) _plugin = this.plugins.find(plugin => plugin.pluginPath === plugin || plugin.dirName === plugin);
+        const _plugin = this.findPlugin(plugin);
         if (!_plugin) throw { 'message': 'Attempted to reload a plugin that is not loaded?' };
         if (!_plugin.stop()) throw { 'message': 'Plugin failed to stop!' };
-        const index = this.plugins.findIndex(plugin => plugin === _plugin);
+        const index = this.getPluginIndex(_plugin);
         const { pluginPath, dirName } = _plugin;
         delete window.require.cache[window.require.resolve(pluginPath)];
 
@@ -118,8 +117,22 @@ class PluginManager extends Module {
         return this.loadPlugin(dirName);
     }
 
-    getPluginByName(name) { return this.plugins.find(plugin => plugin.name === name); }
-    getPluginById(id) { return this.plugins.find(plugin => plugin.id === id); }
+    //TODO make this nicer
+    findPlugin(wild) {
+        let plugin = this.getPluginByName(wild);
+        if (plugin) return plugin;
+        plugin = this.getPluginById(wild);
+        if (plugin) return plugin;
+        plugin = this.getPluginByPath(wild);
+        if (plugin) return plugin;
+        return this.getPluginByDirName(wild);
+    }
+
+    getPluginIndex(plugin) { return this.plugins.findIndex(p => p === plugin) }
+    getPluginByName(name) { return this.plugins.find(p => p.name === name) }
+    getPluginById(id) { return this.plugins.find(p => p.id === id) }
+    getPluginByPath(path) { return this.plugins.find(p => p.pluginPath === path) }
+    getPluginByDirName(dirName) { return this.plugins.find(p => p.dirName === dirName) }
 
     stopPlugin(name) {
         const plugin = this.getPluginByName(name);

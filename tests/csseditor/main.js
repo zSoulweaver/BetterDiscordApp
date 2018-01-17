@@ -14,6 +14,8 @@ const
     $btnSave = $('#btnSave'),
     $btnUpdate = $('#btnUpdate');
 
+$closeeditor.on('click', e => window.close());
+
 ipcRenderer.on('set-css', (_, data) => {
     if (data.error) {
         alert(data.error);

@@ -121,6 +121,15 @@ class FileUtils {
         });
     }
 
+    static async writeFile(path, data) {
+        return new Promise((resolve, reject) => {
+            fs.writeFile(path, data, err => {
+                if (err) return reject(err);
+                resolve();
+            });
+        });
+    }
+
     static async readJsonFromFile(path) {
         let readFile;
         try {
@@ -135,6 +144,10 @@ class FileUtils {
         } catch (err) {
             throw (Object.assign(err, { path }));
         }
+    }
+
+    static async writeJsonToFile(path, json) {
+        return this.writeFile(path, JSON.stringify(json));
     }
 }
 

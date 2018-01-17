@@ -10,13 +10,14 @@
 
 'use strict';
 
-const { Global, Logger, Utils, PluginManager, BDIpc, WebpackModules, SocketProxy } = require('./modules');
+const { Global, Logger, Utils, PluginManager, BDIpc, WebpackModules, SocketProxy, CssEditor } = require('./modules');
 
 class BetterDiscord {
 
     constructor() {
         window.bdUtils = Utils;
         window.wpm = WebpackModules;
+        window.cssEditor = CssEditor;
     }
 
 }

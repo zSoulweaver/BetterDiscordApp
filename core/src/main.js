@@ -23,7 +23,7 @@ const __DEV = {
 const __pluginPath = path.resolve(__dirname, '..', '..', 'tests', 'plugins');
 const __themePath = path.resolve(__dirname, '..', '..', 'tests', 'themes');
 
-const { Utils, FileUtils, BDIpc, Config, WindowUtils } = require('./modules');
+const { Utils, FileUtils, BDIpc, Config, WindowUtils, CSSEditor } = require('./modules');
 const { BrowserWindow } = require('electron');
 
 const Common = {};
@@ -49,6 +49,10 @@ class Comms {
     initListeners() {
         BDIpc.on('bd-getConfig', o => {
             o.reply(Common.Config.config);
+        });
+
+        BDIpc.on('bd-openCssEditor', o => {
+            o.reply(CSSEditor.openEditor());
         });
 
         BDIpc.on('bd-readFile', this.readFile);

@@ -6,3 +6,4 @@ export { BDIpc } from './bdipc';
 export { WebpackModules } from './webpackmodules';
 export { Events } from './events';
 export { SocketProxy } from './discordsocket';
+export { CssEditor } from './csseditor';

@@ -29,6 +29,7 @@ class Plugin {
     get authors() { return this.info.authors }
     get version() { return this.info.version }
     get pluginPath() { return this.paths.pluginPath }
+    get dirName() { return this.paths.dirName }
     get enabled() { return this.userConfig.enabled }
 
     start() {
@@ -62,6 +63,7 @@ class PluginManager extends Module {
 
     async loadPlugin(pluginPath) {
         const { plugins } = this.state;
+        const dirName = pluginPath;
 
         try {
             const pluginsPath = this.pluginsPath();
@@ -74,14 +76,12 @@ class PluginManager extends Module {
 
             const readConfig = await this.readConfig(pluginPath);
             const mainPath = path.join(pluginPath, readConfig.main);
-
-            //TODO Read plugin user config and call onStart if enabled
             const userConfigPath = path.join(pluginPath, 'user.config.json');
 
             let userConfig = readConfig.defaultConfig;
             try {
                 const readUserConfig = await FileUtils.readJsonFromFile(userConfigPath);
-                userConfig = Object.assign(userConfig, readUserConfig);
+                userConfig = Object.assign({}, userConfig, readUserConfig);
             } catch (err) {/*We don't care if this fails it either means that user config doesn't exist or there's something wrong with it so we revert to default config*/}
 
             const configs = {
@@ -90,7 +90,7 @@ class PluginManager extends Module {
             };
 
             const plugin = window.require(mainPath)(Plugin, {}, {});
-            const instance = new plugin({configs, info: readConfig.info, main: readConfig.main, paths: { pluginPath }});
+            const instance = new plugin({configs, info: readConfig.info, main: readConfig.main, paths: { pluginPath, dirName }});
 
             if (instance.enabled) instance.start();
 
@@ -104,13 +104,35 @@ class PluginManager extends Module {
         }
     }
 
-    async reloadPlugin(pluginPath) {
-        //TODO Cleanup loaded plugin
-        return await this.loadPlugin(pluginPath);
+    async reloadPlugin(plugin) {
+        const _plugin = this.findPlugin(plugin);
+        if (!_plugin) throw { 'message': 'Attempted to reload a plugin that is not loaded?' };
+        if (!_plugin.stop()) throw { 'message': 'Plugin failed to stop!' };
+        const index = this.getPluginIndex(_plugin);
+        const { pluginPath, dirName } = _plugin;
+        delete window.require.cache[window.require.resolve(pluginPath)];
+
+        this.plugins.splice(index, 1);
+
+        return this.loadPlugin(dirName);
     }
 
-    getPluginByName(name) { return this.plugins.find(plugin => plugin.name === name); }
-    getPluginById(id) { return this.plugins.find(plugin => plugin.id === id); }
+    //TODO make this nicer
+    findPlugin(wild) {
+        let plugin = this.getPluginByName(wild);
+        if (plugin) return plugin;
+        plugin = this.getPluginById(wild);
+        if (plugin) return plugin;
+        plugin = this.getPluginByPath(wild);
+        if (plugin) return plugin;
+        return this.getPluginByDirName(wild);
+    }
+
+    getPluginIndex(plugin) { return this.plugins.findIndex(p => p === plugin) }
+    getPluginByName(name) { return this.plugins.find(p => p.name === name) }
+    getPluginById(id) { return this.plugins.find(p => p.id === id) }
+    getPluginByPath(path) { return this.plugins.find(p => p.pluginPath === path) }
+    getPluginByDirName(dirName) { return this.plugins.find(p => p.dirName === dirName) }
 
     stopPlugin(name) {
         const plugin = this.getPluginByName(name);
@@ -133,9 +155,7 @@ class PluginManager extends Module {
 
 const _instance = new PluginManager();
 
-async function pluginManager() {
-
-    const pluginName = 'Example';
+async function pluginManager(pluginName) {
 
     try {
         //Load test plugin
@@ -146,7 +166,13 @@ async function pluginManager() {
         return true;
     } catch (err) {
         console.log(`Failed to load plugin! ${err.message}`);
-        throw err;
+    }
+
+    try {
+        //Reload test plugin
+        const reloadedPlugin = await _instance.reloadPlugin('Example Plugin');
+    } catch (err) {
+        console.log(`Failed to reload plugin! ${err.message}`);
     }
 }
 

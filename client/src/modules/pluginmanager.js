@@ -133,9 +133,7 @@ class PluginManager extends Module {
 
 const _instance = new PluginManager();
 
-async function pluginManager() {
-
-    const pluginName = 'Example';
+async function pluginManager(pluginName) {
 
     try {
         //Load test plugin

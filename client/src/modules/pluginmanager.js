@@ -81,7 +81,7 @@ class PluginManager extends Module {
             let userConfig = readConfig.defaultConfig;
             try {
                 const readUserConfig = await FileUtils.readJsonFromFile(userConfigPath);
-                userConfig = Object.assign(userConfig, readUserConfig);
+                userConfig = Object.assign({}, userConfig, readUserConfig);
             } catch (err) {/*We don't care if this fails it either means that user config doesn't exist or there's something wrong with it so we revert to default config*/}
 
             const configs = {

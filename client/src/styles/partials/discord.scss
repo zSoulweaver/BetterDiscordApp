@@ -1,0 +1,19 @@
+/*Some Discord overrides*/
+.guilds-wrapper {
+    padding-top: 50px !important;
+}
+
+[class*="guilds-wrapper"] + [class*="flex"] {
+    border-radius: 0 0 0 5px;
+}
+
+::-webkit-scrollbar {
+    -moz-appearance: scrollbartrack-vertical;
+    background-color: rgba(0,0,0,0.1);
+    width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,0.6);
+    border-radius: 16px;
+}

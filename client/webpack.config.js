@@ -17,6 +17,12 @@ const vueLoader = {
     loader: 'vue-loader'
 }
 
+const scssLoader = {
+    test: /\.scss$/,
+    exclude: /node_modules/,
+    loader: ['css-loader', 'sass-loader']
+}
+
 module.exports = {
     entry: './src/index.js',
     output: {
@@ -24,7 +30,7 @@ module.exports = {
         filename: 'betterdiscord.client.js'
     },
     module: {
-        loaders: [jsLoader, vueLoader]
+        loaders: [jsLoader, vueLoader, scssLoader]
     },
     externals: {
         'electron': 'window.require("electron")'

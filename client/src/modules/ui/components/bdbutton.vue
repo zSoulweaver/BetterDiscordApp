@@ -37,7 +37,7 @@
 
     .bd-settings-button {
         position: absolute;
-        z-index: 90001;
+        z-index: 1;
         top: 22px;
         width: 70px;
         height: 48px;
@@ -65,6 +65,7 @@
             background: transparent;
             opacity: 1;
             box-shadow: none;
+            z-index: 90000;
             /*transform: translateY(-150%);*/
         }
 

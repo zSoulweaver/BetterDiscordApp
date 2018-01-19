@@ -10,13 +10,19 @@
 
 'use strict';
 
-const { Global, Logger, Utils, PluginManager, BDIpc, WebpackModules, SocketProxy } = require('./modules');
+const { Global, Logger, Utils, PluginManager, BDIpc, WebpackModules, SocketProxy, Events } = require('./modules');
+//const { UI } = require('./modules/ui/index.jsx');
 
 class BetterDiscord {
 
     constructor() {
         window.bdUtils = Utils;
         window.wpm = WebpackModules;
+        Events.on('global-ready', e => {
+            const { UI } = require('./modules/ui/vueui.js');
+            this.ui = new UI();
+        });
+        // this.UI = new UI();
     }
 
 }

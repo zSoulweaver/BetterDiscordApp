@@ -8,30 +8,63 @@
  * LICENSE file in the root directory of this source tree. 
 */
 
+const KnownModules = {
+    'React': ('createElement', 'cloneElement'),
+    'react-dom': ('render', 'findDOMNode')
+};
+
+const Cache = {};
+
 class WebpackModules {
 
-    static async getModuleByProps(props) {
-        const modules = await this.getAllModules();
-        return new Promise((resolve, reject) => {
-            const rm = [];
-            for (let index in modules) {
-                if (!modules.hasOwnProperty(index)) continue;
-                const module = modules[index];
-                const { exports } = module;
+    static getModuleByNameSync(name, first, fallback) {
+        //TODO return not first from cache?
+        if (Cache.hasOwnProperty(name)) return Cache[name];
+        if (KnownModules.hasOwnProperty(name)) fallback = KnownModules[name];
+        if (!fallback) return null;
+        return Cache[name] = this.getModuleByPropsSync(fallback, first);
+    }
 
-                if (!exports || typeof exports !== 'object') continue;
-                if (!(props in exports)) continue;
-                rm.push(module);
-               // resolve(module);
-               // break;
-            }
-            resolve(rm);
-            reject(null);
-        });
+    static getModuleByPropsSync(props, first) {
+        const modules = this.getAllModulesSync();
+        const rm = [];
+        for (let index in modules) {
+            if (!modules.hasOwnProperty(index)) continue;
+            const module = modules[index];
+            const { exports } = module;
+
+            if (!exports || typeof exports !== 'object') continue;
+            if (!(props in exports)) continue;
+            rm.push(module);
+        }
+        return first ? rm[0].exports : rm;
+    }
+
+    static async getModuleByName(name, first, fallback) {
+        if (Cache.hasOwnProperty(name)) return Cache[name];
+        if (KnownModules.hasOwnProperty(name)) fallback = KnownModules[name];
+        if (!fallback) return null;
+        return Cache[name] = await this.getModuleByProps(fallback, first);
+    }
+
+    static async getModuleByProps(props, first) {
+        const modules = await this.getAllModules();
+
+        const rm = [];
+        for (let index in modules) {
+            if (!modules.hasOwnProperty(index)) continue;
+            const module = modules[index];
+            const { exports } = module;
+
+            if (!exports || typeof exports !== 'object') continue;
+            if (!(props in exports)) continue;
+            rm.push(module);
+        }
+        return first ? rm[0].exports : rm;
     }
 
     /*This will most likely not work for most modules*/
-    static async getModuleByName(name) {
+   /* static async getModuleByName(name) {
         const modules = await this.getAllModules();
         return new Promise((resolve, reject) => {
             for (let index in modules) {
@@ -51,6 +84,19 @@ class WebpackModules {
 
             reject(null);
         });
+    }*/
+
+    static getAllModulesSync() {
+        const id = 'bd-webpackmodulessync';
+        const __webpack_require__ = window['webpackJsonp'](
+            [],
+            {
+                [id]: (module, exports, __webpack_require__) => exports.default = __webpack_require__
+            },
+            [id]).default;
+        delete __webpack_require__.m[id];
+        delete __webpack_require__.c[id];
+        return __webpack_require__.c;
     }
 
     static async getAllModules() {

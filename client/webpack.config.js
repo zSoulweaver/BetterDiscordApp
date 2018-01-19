@@ -7,8 +7,14 @@ const jsLoader = {
     exclude: /node_modules/,
     loader: 'babel-loader',
     query: {
-       // presets: ['es2015', 'react']
+        presets: ['react']
     }
+}
+
+const vueLoader = {
+    test: /\.(vue)$/,
+    exclude: /node_modules/,
+    loader: 'vue-loader'
 }
 
 module.exports = {
@@ -18,10 +24,15 @@ module.exports = {
         filename: 'betterdiscord.client.js'
     },
     module: {
-        loaders: [jsLoader]
+        loaders: [jsLoader, vueLoader]
     },
     externals: {
         'electron': 'window.require("electron")'
+    },
+    resolve: {
+        alias: {
+            vue$: path.resolve('node_modules', 'vue', 'dist', 'vue.esm.js')
+        }
     }
    /* resolve: {
         alias: {

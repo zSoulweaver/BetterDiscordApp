@@ -1,11 +1,48 @@
 <template>
     <div class="bd-settings" :class="{active: isActive}">
+        <SidebarView>
+            <Sidebar slot="sidebar">
+                <SidebarItem v-for="item in sidebarItems" :item="item" :key="item.id" :onClick="itemOnClick" />
+            </Sidebar>
+        </SidebarView>
+        
     </div>
 </template>
 
 <script>
+
+    const sidebarItems = [
+        { text: 'Internal', t: 'header' },
+        { id: 0, contentid: "core", text: 'Core', active: false, t: 'button' },
+        { id: 1, contentid: "ui", text: 'UI', active: false, t: 'button' },
+        { id: 2, contentid: "emotes", text: 'Emotes', active: false, t: 'button' },
+        { id: 3, contentid: "css", text: 'CSS Editor', active: false, t: 'button' },
+        { text: 'External', t: 'header' },
+        { id: 4, contentid: "plugins", text: 'Plugins', active: false, t: 'button' },
+        { id: 5, contentid: "themes", text: 'Themes', active: false, t: 'button' }
+    ];
+
+    function itemOnClick(id) {
+        console.log(`Item Clicked! ${id}`);
+    }
+
+
+    import { SidebarItem, SidebarView, Sidebar } from './sidebar/index.js';
     export default {
-        props: ['isActive']
+        props: ['isActive'],
+        components: {
+            SidebarItem,
+            SidebarView,
+            Sidebar
+        },
+        data() {
+            return {
+                sidebarItems
+            }
+        },
+        methods: {
+            itemOnClick
+        }
     }
 </script>
 

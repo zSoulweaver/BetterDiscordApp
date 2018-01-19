@@ -19,8 +19,7 @@ class BetterDiscord {
         window.bdUtils = Utils;
         window.wpm = WebpackModules;
         Events.on('global-ready', e => {
-            const { UI } = require('./modules/ui/ui.jsx');
-            console.log(UI);
+            const { UI } = require('./modules/ui/vueui.js');
             this.ui = new UI();
         });
         // this.UI = new UI();

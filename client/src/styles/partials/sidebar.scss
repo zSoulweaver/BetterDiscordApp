@@ -1,0 +1,77 @@
+.bd-sidebar-view {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    box-sizing: border-box;
+
+    .bd-sidebar-region {
+        background: #202225;
+        -webkit-box-flex: 1;
+        -webkit-box-pack: end;
+        display: -webkit-box;
+        display: flex;
+        padding-top: 50px;
+        z-index: 5;
+
+        .bd-settingsWrap {
+            display: flex;
+            height: 100%;
+            -webkit-box-flex: 1;
+            flex: 1;
+            min-height: 1px;
+            box-sizing: border-box;
+
+            .bd-scroller {
+                width: 100%;
+                padding-right: 20px;
+
+                .bd-sidebar {
+                    padding: 0;
+
+                    .bd-header {
+                        padding: 6px 0;
+                        margin-left: 10px;
+                        margin-top: 15px;
+                        color: rgba(255,255,255,0.15);
+                        font-size: 14px;
+                        font-weight: 700;
+                        line-height: 16px;
+                        text-transform: uppercase;
+                        font-weight: 600;
+                        flex-shrink: 0;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                        font-family: Whitney,Helvetica Neue,Helvetica,Arial,sans-serif;
+                    }
+
+                    .bd-item {
+                        border-radius: 3px;
+                        margin-bottom: 2px;
+                        padding-bottom: 6px;
+                        padding-top: 6px;
+                        padding: 6px 10px;
+                        color: #b9bbbe;
+                        cursor: pointer;
+                        font-size: 17px;
+                        line-height: 20px;
+                        position: relative;
+                        flex-shrink: 0;
+                        font-weight: 500;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                        font-family: Whitney,Helvetica Neue,Helvetica,Arial,sans-serif;
+                    }
+                }
+            }
+        }
+    }
+
+    .bd-content-region {
+
+    }
+}

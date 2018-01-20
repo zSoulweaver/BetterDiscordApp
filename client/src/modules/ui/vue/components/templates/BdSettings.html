@@ -17,6 +17,9 @@
             <div :class="{active: activeContent('emotes'), animating: animatingContent('emotes')}">
                 <EmoteSettings />
             </div>
+            <div :class="{active: activeContent('plugins'), animating: animatingContent('plugins')}">
+                <PluginsView />
+            </div>
         </ContentColumn>
 
     </SidebarView>

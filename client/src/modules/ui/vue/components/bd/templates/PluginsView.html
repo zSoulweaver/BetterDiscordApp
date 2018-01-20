@@ -1,0 +1,12 @@
+<SettingsWrapper headertext="Plugins">
+    <div class="bd-flex bd-flex-col bd-pluginsView">
+        <div class="bd-flex">
+            <div class="bd-flex-grow bd-button" :class="{'bd-active': local}" @click="showLocal">
+                <h3>Local</h3>
+            </div>
+            <div class="bd-flex-grow bd-button" :class="{'bd-active': !local}">
+                <h3>Online</h3>
+            </div>
+        </div>
+    </div>
+</SettingsWrapper>

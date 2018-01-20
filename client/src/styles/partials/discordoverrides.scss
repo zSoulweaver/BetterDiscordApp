@@ -1,0 +1,7 @@
+.guilds-wrapper {
+    padding-top: 50px !important;
+}
+
+[class*="guilds-wrapper"] + [class*="flex"] {
+    border-radius: 0 0 0 5px;
+}

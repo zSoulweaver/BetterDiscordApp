@@ -100,6 +100,17 @@ class PluginManager extends Module {
             for (let plugin of this.plugins) {
                 if (directories.includes(plugin.dirName)) continue;
                 //Plugin was deleted manually, stop it and remove any reference
+                try {
+                    if (plugin.enabled) plugin.stop();
+                    const { pluginPath } = plugin;
+                    const index = this.getPluginIndex(plugin);
+
+                    delete window.require.cache[window.require.resolve(pluginPath)];
+                    this.plugins.splice(index, 1);
+                } catch (err) {
+                    //This might fail but we don't have any other option at this point
+                    Logger.err('PluginManager', err);
+                }
             }
         } catch (err) {
             throw err;

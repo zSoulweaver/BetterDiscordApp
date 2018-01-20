@@ -15,6 +15,12 @@
         methods,
         data() {
             return { active: false }
+        },
+        created: function() {
+            window.addEventListener('keyup', e => {
+                if (e.which !== 27) return;
+                this.hideSettings();
+            });
         }
     }
 </script>

@@ -66,7 +66,7 @@
 
     .bd-settings-x {
         position: absolute;
-        top: 32px;
+        top: 15px;
         left: 250px;
         border: 2px solid #6e6e6e;
         border-radius: 50%;
@@ -76,6 +76,14 @@
         display: flex;
         align-items: center;
         cursor: pointer;
+
+        span {
+            color: #72767d;
+            position: absolute;
+            top: 32px;
+            font-weight: 600;
+            font-size: 13px;
+        }
 
         &:hover {
             background-color: hsla(218,5%,47%,.3);

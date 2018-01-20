@@ -7,5 +7,9 @@
             </div>
             <SidebarItem v-for="item in sidebarItems" :item="item" :key="item.id" :onClick="itemOnClick"/>
         </Sidebar>
+        <ContentColumn slot="content">
+            <SettingsWrapper/>
+        </ContentColumn>
+        
     </SidebarView>
 </div>

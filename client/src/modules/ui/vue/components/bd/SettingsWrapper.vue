@@ -1,4 +1,4 @@
-<template src="./templates/View.html"></template>
+<template src="./templates/SettingsWrapper.html"></template>
 <script>
     /*Imports*/
     import { ScrollerWrap } from '../generic';

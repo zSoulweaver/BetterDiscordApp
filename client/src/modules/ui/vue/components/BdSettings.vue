@@ -2,8 +2,9 @@
 
 <script>
     /*Imports*/
-    import { SidebarView, Sidebar, SidebarItem } from './sidebar';
-    const components = { SidebarView, Sidebar, SidebarItem };
+    import { SidebarView, Sidebar, SidebarItem, ContentColumn } from './sidebar';
+    import { SettingsWrapper } from './bd';
+    const components = { SidebarView, Sidebar, SidebarItem, ContentColumn, SettingsWrapper };
 
     /*Constants*/
     const sidebarItems = [

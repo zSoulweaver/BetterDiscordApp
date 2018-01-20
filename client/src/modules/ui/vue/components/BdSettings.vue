@@ -3,8 +3,8 @@
 <script>
     /*Imports*/
     import { SidebarView, Sidebar, SidebarItem, ContentColumn } from './sidebar';
-    import { CoreSettings } from './bd';
-    const components = { SidebarView, Sidebar, SidebarItem, ContentColumn, CoreSettings };
+    import { CoreSettings, UISettings, EmoteSettings } from './bd';
+    const components = { SidebarView, Sidebar, SidebarItem, ContentColumn, CoreSettings, UISettings, EmoteSettings };
 
     /*Constants*/
     const sidebarItems = [

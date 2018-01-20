@@ -11,6 +11,12 @@
             <div :class="{active: activeContent('core'), animating: animatingContent('core')}">
                 <CoreSettings />
             </div>
+            <div :class="{active: activeContent('ui'), animating: animatingContent('ui')}">
+                <UISettings />
+            </div>
+            <div :class="{active: activeContent('emotes'), animating: animatingContent('emotes')}">
+                <EmoteSettings />
+            </div>
         </ContentColumn>
 
     </SidebarView>

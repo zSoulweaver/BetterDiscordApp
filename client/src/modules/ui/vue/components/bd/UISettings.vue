@@ -1,5 +1,5 @@
 <template>
-    <SettingsWrapper headertext="Core Settings">
+    <SettingsWrapper headertext="UI Settings">
     </SettingsWrapper>
 </template>
 

@@ -84,7 +84,39 @@
     .bd-content-region {
         flex-grow: 1;
         transform: translateX(-100%);
-        background: #2F3136;
+        background: #36393e;
+        box-shadow: 0 0 4px #202225;
+
+        .bd-content-column {
+            display: flex;
+            flex-grow: 1;
+            flex-direction: column;
+            height: 100%;
+
+            > div {
+                display: flex;
+                flex-direction: column;
+                flex-grow: 1;
+            }
+
+            .bd-settingsWrap {
+                display: flex;
+                flex-direction: column;
+                flex-grow: 1;
+
+                .bd-settingsWrap-header {
+                    color: $colbdblue;
+                    text-transform: uppercase;
+                    font-weight: 600;
+                    margin-top: 10px;
+                    margin-bottom: 20px;
+                    font-size: 100%;
+                    outline: 0;
+                    padding: 0;
+                    vertical-align: baseline;
+                }
+            }
+        }
     }
 
     .bd-content > div:not(.active) {
@@ -102,6 +134,8 @@
             padding: 20px 15px 15px 15px;
         }
     }
+
+
 
     &.active {
         .bd-content-region {

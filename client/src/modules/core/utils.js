@@ -1,5 +1,5 @@
 /**
- * BetterDiscord Utils Module
+ * BetterDiscord Client Utils Module
  * Copyright (c) 2015-present JsSucks - https://github.com/JsSucks
  * All rights reserved.
  * https://github.com/JsSucks - https://betterdiscord.net
@@ -8,29 +8,60 @@
  * LICENSE file in the root directory of this source tree. 
 */
 
-const 
-    path = require('path'),
-    fs = require('fs');
-
 const { Module } = require('./modulebase');
+const moment = require('moment');
+const fs = window.require('fs');
+const path = window.require('path');
+
+const logs = [];
+
+class Logger {
+
+    static log(module, message, level = 'log') {
+        level = this.parseLevel(level);
+        console[level]('[%cBetter%cDiscord:%s] %s', 'color: #3E82E5', '', `${module}${level === 'debug' ? '|DBG' : ''}`, message);
+        logs.push(`[${moment().format('DD/MM/YY hh:mm:ss')}|${module}|${level}] ${message}`);
+        window.bdlogs = logs;
+    }
+
+    static get levels() {
+        return {
+            'log': 'log',
+            'warn': 'warn',
+            'err': 'error',
+            'error': 'error',
+            'debug': 'debug',
+            'dbg': 'debug',
+            'info': 'info'
+        };
+    }
+
+    static parseLevel(level) {
+        return this.levels.hasOwnProperty(level) ? this.levels[level] : 'log';
+    }
+}
 
 class Utils {
+
+    static overload(fn, cb) {
+        const orig = fn;
+        return function(...args) {
+            orig(...args);
+            cb(...args);
+        }
+    }
 
     static async tryParseJson(jsonString) {
         try {
             return JSON.parse(jsonString);
-        }catch(err) {
+        } catch (err) {
             throw ({
                 'message': 'Failed to parse json',
                 err
             });
         }
     }
-
-    static get timestamp() {
-        return 'Timestamp';
-    }
-
+    
 }
 
 class FileUtils {
@@ -38,12 +69,12 @@ class FileUtils {
     static async fileExists(path) {
         return new Promise((resolve, reject) => {
             fs.stat(path, (err, stats) => {
-                if(err) return reject({
+                if (err) return reject({
                     'message': `No such file or directory: ${err.path}`,
                     err
                 });
 
-                if(!stats.isFile()) return reject({
+                if (!stats.isFile()) return reject({
                     'message': `Not a file: ${path}`,
                     stats
                 });
@@ -56,12 +87,12 @@ class FileUtils {
     static async directoryExists(path) {
         return new Promise(resolve => {
             fs.stat(path, (err, stats) => {
-                if(err) return reject({
+                if (err) return reject({
                     'message': `Directory does not exist: ${path}`,
                     err
                 });
 
-                if(!stats.isDirectory()) return reject({
+                if (!stats.isDirectory()) return reject({
                     'message': `Not a directory: ${path}`,
                     stats
                 });
@@ -74,13 +105,13 @@ class FileUtils {
     static async readFile(path) {
         try {
             await this.fileExists(path);
-        } catch(err) {
-            throw(err);
+        } catch (err) {
+            throw (err);
         }
 
         return new Promise(resolve => {
             fs.readFile(path, 'utf-8', (err, data) => {
-                if(err) reject({
+                if (err) reject({
                     'message': `Could not read file: ${path}`,
                     err
                 });
@@ -90,66 +121,35 @@ class FileUtils {
         });
     }
 
+    static async writeFile(path, data) {
+        return new Promise((resolve, reject) => {
+            fs.writeFile(path, data, err => {
+                if (err) return reject(err);
+                resolve();
+            });
+        });
+    }
+
     static async readJsonFromFile(path) {
         let readFile;
         try {
             readFile = await this.readFile(path);
-        } catch(err) {
-            throw(err);
+        } catch (err) {
+            throw (err);
         }
 
         try {
             const parsed = await Utils.tryParseJson(readFile);
             return parsed;
-        } catch(err) {
-            throw(Object.assign(err, { path }));
+        } catch (err) {
+            throw (Object.assign(err, { path }));
         }
     }
+
+    static async writeJsonToFile(path, json) {
+        return this.writeFile(path, JSON.stringify(json));
+    }
 }
 
-class WindowUtils extends Module {
 
-    bindings() {
-        this.openDevTools = this.openDevTools.bind(this);
-        this.executeJavascript = this.executeJavascript.bind(this);
-        this.injectScript = this.injectScript.bind(this);
-    }
-
-    get window() {
-        return this.state.window;
-    }
-
-    get webContents() {
-        return this.window.webContents;
-    }
-
-    openDevTools() {
-        this.webContents.openDevTools();
-    }
-
-    executeJavascript(script) {
-        this.webContents.executeJavaScript(script);
-    }
-
-    injectScript(fpath, variable) {
-        console.log(`Injecting: ${fpath}`);
-        if (variable) this.executeJavascript(`${variable} = require("${fpath}");`);
-        else this.executeJavascript(`require("${fpath}");`);
-    }
-
-    events(event, callback) {
-        this.webContents.on(event, callback);
-    }
-
-    send(channel, message) {
-        channel = channel.startsWith('bd-') ? channel : `bd-${channel}`;
-        this.webContents.send(channel, message);
-    }
-    
-}
-
-module.exports = {
-    Utils,
-    FileUtils,
-    WindowUtils
-}
+module.exports = { Logger, Utils, FileUtils }

@@ -22,6 +22,12 @@ class Logger {
     static info(module, message) { this.log(module, message, 'info'); }
     static dbg(module, message) { this.log(module, message, 'dbg'); }
     static log(module, message, level = 'log') {
+        message = message.message || message;
+        if (typeof message === 'object') {
+            //TODO object handler for logs
+            console.log(message);
+            return;
+        }
         level = this.parseLevel(level);
         console[level]('[%cBetter%cDiscord:%s] %s', 'color: #3E82E5', '', `${module}${level === 'debug' ? '|DBG' : ''}`, message);
         logs.push(`[${moment().format('DD/MM/YY hh:mm:ss')}|${module}|${level}] ${message}`);

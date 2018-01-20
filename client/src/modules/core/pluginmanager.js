@@ -9,7 +9,7 @@
 */
 
 const { Module } = require('./modulebase');
-const { FileUtils } = require('./utils');
+const { FileUtils, Logger } = require('./utils');
 const { Global } = require('./global');
 const path = window.require('path');
 
@@ -70,7 +70,7 @@ class PluginManager extends Module {
                     await this.loadPlugin(dir);
                 } catch (err) {
                     //We don't want every plugin to fail loading when one does
-                    console.log(err);
+                    Logger.err('PluginManager', err);
                 }
             }
 

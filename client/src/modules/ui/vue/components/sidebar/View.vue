@@ -6,7 +6,6 @@
     /*<= Imports*/
 
     export default {
-        components,
-        props: ['dark']
+        components
     }
 </script>

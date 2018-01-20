@@ -5,6 +5,7 @@
     const components = { ScrollerWrap };
 
     export default {
-        components
+        components,
+        props: ['contentVisible', 'animating']
     }
 </script>

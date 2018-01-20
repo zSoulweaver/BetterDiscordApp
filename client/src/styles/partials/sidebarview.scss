@@ -86,4 +86,26 @@
         transform: translateX(-100%);
         background: #2F3136;
     }
+
+    .bd-content > div:not(.active) {
+        opacity: 0;
+    }
+
+    .bd-content {
+        animation: bd-fade-in .4s forwards;
+
+        .animating {
+            animation: bd-fade-out .4s forwards;
+        }
+
+        .bd-settingsWrap {
+            padding: 20px 15px 15px 15px;
+        }
+    }
+
+    &.active {
+        .bd-content-region {
+            animation: bd-slidein .6s forwards;
+        }
+    }
 }

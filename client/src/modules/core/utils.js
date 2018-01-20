@@ -17,11 +17,23 @@ const logs = [];
 
 class Logger {
 
+    static err(module, message) { this.log(module, message, 'err'); }
+    static warn(module, message) { this.log(module, message, 'warn'); }
+    static info(module, message) { this.log(module, message, 'info'); }
+    static dbg(module, message) { this.log(module, message, 'dbg'); }
     static log(module, message, level = 'log') {
         level = this.parseLevel(level);
         console[level]('[%cBetter%cDiscord:%s] %s', 'color: #3E82E5', '', `${module}${level === 'debug' ? '|DBG' : ''}`, message);
         logs.push(`[${moment().format('DD/MM/YY hh:mm:ss')}|${module}|${level}] ${message}`);
         window.bdlogs = logs;
+    }
+
+    static logError(err) {
+        if (!err.module && !err.message) {
+            console.log(err);
+            return;
+        }
+        this.err(err.module, err.message);
     }
 
     static get levels() {

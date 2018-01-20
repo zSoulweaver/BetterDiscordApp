@@ -70,6 +70,18 @@
     &.active {
         width: 900px;
     }
+
+    .platform-darwin & {
+        top: 0px;
+
+        .bd-sidebar-view .bd-sidebar-region,
+        .bd-sidebar-view .bd-content-region {
+            padding-top: 22px;
+        }
+        .bd-settings-x {
+            top: 22px;
+        }
+    }
 }
 
 .bd-settings.active {

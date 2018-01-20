@@ -1,5 +1,5 @@
 <template>
-    <div class="bd-settings-wrapper">
+    <div :class="['bd-settings-wrapper', 'platform-' + this.platform]">
         <div class="bd-settings-button" :class="{active: this.isActive}" @click="showSettings">
             <div class="bd-settings-button-btn"></div>
         </div>
@@ -14,7 +14,8 @@
         },
         data() {
             return {
-                isActive: false
+                isActive: false,
+                platform: global.process.platform
             }
         },
         methods: {

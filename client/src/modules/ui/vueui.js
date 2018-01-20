@@ -11,19 +11,18 @@
 const $ = require('jquery');
 const Vue = require('vue');
 
-const BdButton = (require('./components/bdbutton.vue')).default;
+const BdSettingsWrapper = (require('./vue/components/BdSettingsWrapper.vue')).default;
 class UI {
 
     constructor() {
-        $('body').append($('<div/>', {
-            class: 'bd-settingsbutton',
-            id: 'bd-settingsbutton'
-        }));
+        $('body').append($('<bdbody/>').append($('<div/>', {
+            id: 'bd-settings'
+        })));
 
          this.vueInstance = new Vue.default({
-             el: '#bd-settingsbutton',
-             template: '<BdButton/>',
-             components: { BdButton }
+             el: '#bd-settings',
+             template: '<BdSettingsWrapper/>',
+             components: { BdSettingsWrapper }
          });
     }
 

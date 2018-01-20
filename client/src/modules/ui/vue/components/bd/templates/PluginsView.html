@@ -4,9 +4,12 @@
             <div class="bd-flex-grow bd-button" :class="{'bd-active': local}" @click="showLocal">
                 <h3>Local</h3>
             </div>
-            <div class="bd-flex-grow bd-button" :class="{'bd-active': !local}">
+            <div class="bd-flex-grow bd-button" :class="{'bd-active': !local}" @click="showOnline">
                 <h3>Online</h3>
             </div>
+        </div>
+        <div v-if="local" class="bd-flex bd-flex-grow bd-flex-col bd-plugins-container bd-local-plugins">
+            <PluginCard v-for="plugin in localPlugins" :plugin="plugin" :key="plugin.id"/>
         </div>
     </div>
 </SettingsWrapper>

@@ -3,6 +3,7 @@
 <script>
 
     export default {
-        props: ['plugin']
+        props: ['plugin'],
+        name: "PluginCard"
     }
 </script>

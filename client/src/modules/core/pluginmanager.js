@@ -191,13 +191,21 @@ class PluginManager extends Module {
 
     stopPlugin(name) {
         const plugin = this.getPluginByName(name);
-        if (plugin && plugin.instance) return plugin.instance.stop();
+        try {
+            if (plugin && plugin.instance) return plugin.instance.stop();
+        } catch (err) {
+            Logger.err('PluginManager', err);
+        }
         return true; //Return true anyways since plugin doesn't exist
     }
 
     startPlugin(name) {
         const plugin = this.getPluginByName(name);
-        if (plugin && plugin.instance) return plugin.instance.start();
+        try {
+            if (plugin && plugin.instance) return plugin.instance.start();
+        } catch (err) {
+            Logger.err('PluginManager', err);
+        }
         return true; //Return true anyways since plugin doesn't exist
     }
 

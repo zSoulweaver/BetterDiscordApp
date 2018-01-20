@@ -12,7 +12,7 @@
      /*Methods*/
     async function refreshLocalPlugins() {
         try {
-            await PluginManager.loadAllPlugins();
+            await PluginManager.refreshPlugins();
         } catch (err) {
             
         }

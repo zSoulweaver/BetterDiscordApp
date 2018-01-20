@@ -62,7 +62,6 @@ class PluginManager extends Module {
     }
 
     async loadAllPlugins() {
-        console.log("LOAD ALL PLUGINS!");
         try {
             const directories = await FileUtils.readDir(this.pluginsPath);
 
@@ -76,6 +75,32 @@ class PluginManager extends Module {
             }
 
             return this.plugins;
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    async refreshPlugins() {
+        if (this.plugins.length <= 0) return this.loadAllPlugins();
+        try {
+            const directories = await FileUtils.readDir(this.pluginsPath);
+            for (let dir of directories) {
+                //If a plugin is already loaded this should resolve.
+                if (this.getPluginByDirName(dir)) continue;
+
+                try {
+                    //Load the plugin if not
+                    await this.loadPlugin(dir);
+                } catch (err) {
+                    //We don't want every plugin to fail loading when one does
+                    Logger.err('PluginManager', err);
+                }
+            }
+
+            for (let plugin of this.plugins) {
+                if (directories.includes(plugin.dirName)) continue;
+                //Plugin was deleted manually, stop it and remove any reference
+            }
         } catch (err) {
             throw err;
         }

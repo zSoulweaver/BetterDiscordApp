@@ -57,8 +57,22 @@ class PluginManager extends Module {
         return this.state.plugins;
     }
 
-    pluginsPath() {
+    get pluginsPath() {
         return Global.getObject('paths').find(path => path.id === 'plugins').path;
+    }
+
+    async loadAllPlugins() {
+        try {
+            const directories = await FileUtils.readDir(this.pluginsPath);
+
+            for (let dir of directories) {
+                await this.loadPlugin(dir);
+            }
+
+            return this.plugins;
+        } catch (err) {
+            throw err;
+        }
     }
 
     async loadPlugin(pluginPath) {
@@ -66,8 +80,7 @@ class PluginManager extends Module {
         const dirName = pluginPath;
 
         try {
-            const pluginsPath = this.pluginsPath();
-            pluginPath = path.join(pluginsPath, pluginPath);
+            pluginPath = path.join(this.pluginsPath, pluginPath);
 
             const loaded = plugins.find(plugin => plugin.pluginPath === pluginPath);
             if (loaded) {

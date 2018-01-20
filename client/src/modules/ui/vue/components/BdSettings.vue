@@ -63,6 +63,11 @@
                 animating: false,
                 first: true
             }
+        },
+        updated: function () {
+            if (this.active) return;
+            this.activeIndex = this.lastActiveIndex = -1;
+            this.sidebarItems.forEach(item => item.active = false);
         }
     }
 </script>

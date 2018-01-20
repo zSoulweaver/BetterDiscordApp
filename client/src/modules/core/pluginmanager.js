@@ -62,6 +62,7 @@ class PluginManager extends Module {
     }
 
     async loadAllPlugins() {
+        console.log("LOAD ALL PLUGINS!");
         try {
             const directories = await FileUtils.readDir(this.pluginsPath);
 

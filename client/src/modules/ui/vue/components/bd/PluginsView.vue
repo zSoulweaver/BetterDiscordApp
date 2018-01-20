@@ -11,8 +11,10 @@
 
      /*Methods*/
     async function refreshLocalPlugins() {
-        if (PluginManager.plugins.length <= 0) {
+        try {
             await PluginManager.loadAllPlugins();
+        } catch (err) {
+            
         }
         this.localPlugins = PluginManager.plugins;
     }

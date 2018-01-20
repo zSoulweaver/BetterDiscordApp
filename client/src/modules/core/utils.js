@@ -149,6 +149,20 @@ class FileUtils {
     static async writeJsonToFile(path, json) {
         return this.writeFile(path, JSON.stringify(json));
     }
+
+    static async readDir(path) {
+        try {
+            await this.directoryExists(path);
+            return new Promise((resolve, reject) => {
+                fs.readdir(path, (err, files) => {
+                    if (err) return reject(err);
+                    resolve(files);
+                });
+            });
+        } catch (err) {
+            throw err;
+        }
+    }
 }
 
 

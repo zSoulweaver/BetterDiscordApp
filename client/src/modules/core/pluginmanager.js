@@ -66,7 +66,12 @@ class PluginManager extends Module {
             const directories = await FileUtils.readDir(this.pluginsPath);
 
             for (let dir of directories) {
-                await this.loadPlugin(dir);
+                try {
+                    await this.loadPlugin(dir);
+                } catch (err) {
+                    //We don't want every plugin to fail loading when one does
+                    console.log(err);
+                }
             }
 
             return this.plugins;

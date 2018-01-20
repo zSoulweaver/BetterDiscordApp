@@ -10,7 +10,7 @@
 
     const methods = { showSettings, hideSettings };
 
-    let keydownEvent;
+    let globalKeyListener;
 
     export default {
         components,
@@ -21,24 +21,21 @@
                 platform: global.process.platform
             }
         },
-        created: function() {
-            window.addEventListener('keydown', keydownEvent = e => {
-                if (this.active) {
-                    if (e.which === 27)
-                        this.hideSettings();
-                } else {
-                    if (global.process.platform == 'darwin' && e.metaKey && e.key == 'b')
-                        this.showSettings();
-                    else if (global.process.platform != 'darwin' && e.ctrlKey && e.key == 'b')
-                        this.showSettings();
-                    else return;
+        created: function () {
+            window.addEventListener('keyup', globalKeyListener = e => {
+                if (this.active && e.which === 27) {
+                    this.hideSettings();
+                    return;
                 }
+                if (!e.metaKey && !e.ctrlKey && e.key !== 'b') return;
+
+                !this.active ? this.showSettings() : this.hideSettings();
 
                 e.stopImmediatePropagation();
             });
         },
-        destroyed: function() {
-            window.removeEventListener('keydown', keydownEvent);
+        destroyed: function () {
+            if (globalKeyListener) window.removeEventListener('keyup', globalKeyListener);
         }
     }
 </script>

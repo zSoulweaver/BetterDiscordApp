@@ -188,7 +188,7 @@ class Filters {
             const component = selector(module);
             if (!component) return false;
             return props.every(property => component[property] !== undefined);
-        }
+        };
     }
 
     static byPrototypeFields(fields, selector = m => m) {
@@ -196,11 +196,8 @@ class Filters {
             const component = selector(module);
             if (!component) return false;
             if (!component.prototype) return false;
-            for (const field of fields) {
-                if (!component.prototype[field]) return false;
-            }
-            return true;
-        }
+            return fields.every(field => component.prototype[field] !== undefined);
+        };
     }
 
     static byCode(search, selector = m => m) {
@@ -208,22 +205,19 @@ class Filters {
             const method = selector(module);
             if (!method) return false;
             return method.toString().search(search) !== -1;
-        }
+        };
     }
 
     static byDisplayName(name) { 
         return module => {
             return module && module.displayName === name;
-        }
+        };
     }
 
     static combine(...filters) { 
         return module => {
-            for (const filter of filters) {
-                if (!filter(module)) return false;
-            }
-            return true;
-        }
+            return filters.every(filter => filter(module));
+        };
     }
 };
 

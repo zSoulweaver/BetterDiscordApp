@@ -20,6 +20,7 @@ class CSSEditor extends Module {
             this.editor.focus();
             this.editor.flashFrame(true);
             o.reply(true);
+            return;
         }
 
         this.editor = new BrowserWindow(this.options);

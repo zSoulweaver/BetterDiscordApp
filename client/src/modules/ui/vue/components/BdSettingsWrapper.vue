@@ -27,7 +27,7 @@
                     this.hideSettings();
                     return;
                 }
-                if (!e.metaKey && !e.ctrlKey && e.key !== 'b') return;
+                if (!e.metaKey && !e.ctrlKey || e.key !== 'b') return;
 
                 !this.active ? this.showSettings() : this.hideSettings();
 

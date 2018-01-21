@@ -9,7 +9,6 @@
 */
 
 const { Module } = require('./modulebase');
-const moment = require('moment');
 const fs = window.require('fs');
 const path = window.require('path');
 
@@ -17,11 +16,29 @@ const logs = [];
 
 class Logger {
 
+    static err(module, message) { this.log(module, message, 'err'); }
+    static warn(module, message) { this.log(module, message, 'warn'); }
+    static info(module, message) { this.log(module, message, 'info'); }
+    static dbg(module, message) { this.log(module, message, 'dbg'); }
     static log(module, message, level = 'log') {
+        message = message.message || message;
+        if (typeof message === 'object') {
+            //TODO object handler for logs
+            console.log(message);
+            return;
+        }
         level = this.parseLevel(level);
         console[level]('[%cBetter%cDiscord:%s] %s', 'color: #3E82E5', '', `${module}${level === 'debug' ? '|DBG' : ''}`, message);
-        logs.push(`[${moment().format('DD/MM/YY hh:mm:ss')}|${module}|${level}] ${message}`);
+        logs.push(`[${BetterDiscord.vendor.moment().format('DD/MM/YY hh:mm:ss')}|${module}|${level}] ${message}`);
         window.bdlogs = logs;
+    }
+
+    static logError(err) {
+        if (!err.module && !err.message) {
+            console.log(err);
+            return;
+        }
+        this.err(err.module, err.message);
     }
 
     static get levels() {
@@ -121,6 +138,15 @@ class FileUtils {
         });
     }
 
+    static async writeFile(path, data) {
+        return new Promise((resolve, reject) => {
+            fs.writeFile(path, data, err => {
+                if (err) return reject(err);
+                resolve();
+            });
+        });
+    }
+
     static async readJsonFromFile(path) {
         let readFile;
         try {
@@ -136,7 +162,69 @@ class FileUtils {
             throw (Object.assign(err, { path }));
         }
     }
+
+    static async writeJsonToFile(path, json) {
+        return this.writeFile(path, JSON.stringify(json));
+    }
+
+    static async readDir(path) {
+        try {
+            await this.directoryExists(path);
+            return new Promise((resolve, reject) => {
+                fs.readdir(path, (err, files) => {
+                    if (err) return reject(err);
+                    resolve(files);
+                });
+            });
+        } catch (err) {
+            throw err;
+        }
+    }
 }
 
+class Filters {
+    static byProperties(props, selector = m => m) {
+        return module => {
+            const component = selector(module);
+            if (!component) return false;
+            return props.every(property => component[property] !== undefined);
+        }
+    }
 
-module.exports = { Logger, Utils, FileUtils }
+    static byPrototypeFields(fields, selector = m => m) {
+        return module => {
+            const component = selector(module);
+            if (!component) return false;
+            if (!component.prototype) return false;
+            for (const field of fields) {
+                if (!component.prototype[field]) return false;
+            }
+            return true;
+        }
+    }
+
+    static byCode(search, selector = m => m) {
+        return module => {
+            const method = selector(module);
+            if (!method) return false;
+            return method.toString().search(search) !== -1;
+        }
+    }
+
+    static byDisplayName(name) { 
+        return module => {
+            return module && module.displayName === name;
+        }
+    }
+
+    static combine(...filters) { 
+        return module => {
+            for (const filter of filters) {
+                if (!filter(module)) return false;
+            }
+            return true;
+        }
+    }
+};
+
+module.exports = { Logger, Utils, FileUtils, Filters }

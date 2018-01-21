@@ -1,9 +1,8 @@
-export { Global } from './global';
-export { Logger, Utils, FileUtils } from './utils';
-export { PluginManager } from './pluginmanager';
-export { Pluging } from './plugin';
-export { BDIpc } from './bdipc';
-export { WebpackModules } from './webpackmodules';
-export { Events } from './events';
-export { SocketProxy } from './discordsocket';
-export { CssEditor } from './csseditor';
+export { Global } from './core/global';
+export { Logger, Utils, FileUtils } from './core/utils';
+export { PluginManager } from './core/pluginmanager';
+export { Pluging } from './core/plugin';
+export { BDIpc } from './core/bdipc';
+export { WebpackModules } from './core/webpackmodules';
+export { Events } from './core/events';
+export { SocketProxy } from './core/discordsocket';

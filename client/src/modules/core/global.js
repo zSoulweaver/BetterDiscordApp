@@ -11,12 +11,14 @@
 const { Module } = require('./modulebase');
 const { Events } = require('./events');
 const { BDIpc } = require('./bdipc');
+const { WebpackModules } = require('./webpackmodules');
 
 class Global extends Module {
 
     constructor(args) {
         super(args);
         this.first();
+        window.gl = this;
     }
 
     bindings() {
@@ -29,6 +31,13 @@ class Global extends Module {
         (async () => {
             const config = await BDIpc.send('getConfig');
             this.setState(config);
+           /* const getReact = await WebpackModules.getModuleByProps(('createElement', 'cloneElement'));
+            this.React = getReact[0].exports;
+            window.React = this.React;
+            const getReactDom = await WebpackModules.getModuleByProps(('render', 'findDOMNode'));
+            this.reactDOM = getReactDom[0].exports;*/
+           // this.setState(Object.assign(config, { React, reactDOM }));
+            Events.emit('global-ready');
         })();
 
         if (window.__bd) {
@@ -49,6 +58,10 @@ class Global extends Module {
 
     getObject(name) {
         return this.state[name];
+    }
+
+    getLoadedModule(name) {
+        return this[name];
     }
 
 }

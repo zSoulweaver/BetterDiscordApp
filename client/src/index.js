@@ -10,14 +10,26 @@
 
 'use strict';
 
-const { Global, Logger, Utils, PluginManager, BDIpc, WebpackModules, SocketProxy, CssEditor } = require('./modules');
+const styles = require('./styles/index.scss');
+const { Global, Logger, Utils, PluginManager, BDIpc, WebpackModules, SocketProxy, Events } = require('./modules');
+//const { UI } = require('./modules/ui/index.jsx');
 
 class BetterDiscord {
 
     constructor() {
         window.bdUtils = Utils;
         window.wpm = WebpackModules;
-        window.cssEditor = CssEditor;
+        Events.on('global-ready', e => {
+            const { UI } = require('./modules/ui/vueui.js');
+            this.ui = new UI();
+        });
+
+        //Inject styles to head for now
+        const style = document.createElement('style');
+        style.id = 'bd-main';
+        style.type = 'text/css';
+        style.appendChild(document.createTextNode(styles));
+        document.head.appendChild(style);
     }
 
 }
@@ -30,7 +42,7 @@ if (window.BetterDiscord) {
         'vendor': {
             jQuery: require('jquery'),
             $: require('jquery'),
-            moment: require('moment')
+            moment: window.wpm.getModuleByNameSync('Moment')
         }
     };
 }

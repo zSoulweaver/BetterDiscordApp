@@ -19,6 +19,7 @@
   "scripts": {
     "build": "cd ./client && npm run build && cd ../core && npm run build",
     "watch_client": "cd ./client && npm run watch",
-    "watch_core": "cd ./core && npm run watch"
+    "watch_core": "cd ./core && npm run watch",
+    "test":  "npm run build" 
   }
 }

@@ -15,11 +15,11 @@ const { Module } = require('./modulebase');
 
 class CSSEditor extends Module {
 
-    openEditor() {
+    openEditor(o) {
         if (this.editor && this.editor.open) {
             this.editor.focus();
             this.editor.flashFrame(true);
-            return true;
+            o.reply(true);
         }
 
         this.editor = new BrowserWindow(this.options);
@@ -30,7 +30,17 @@ class CSSEditor extends Module {
             this.editor.open = false;
         });
 
-        return true;
+        this.editor.webContents.on('did-finish-load', () => {
+            o.reply(true);
+        });
+    }
+
+    setCSS(css) {
+        this.editor.webContents.send("set-css", css);
+    }
+
+    set alwaysOnTop(state) {
+        this.editor.setAlwaysOnTop(state);
     }
 
     //TODO user options from config

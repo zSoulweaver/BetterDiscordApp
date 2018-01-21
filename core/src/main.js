@@ -51,9 +51,8 @@ class Comms {
             o.reply(Common.Config.config);
         });
 
-        BDIpc.on('bd-openCssEditor', o => {
-            o.reply(CSSEditor.openEditor());
-        });
+        BDIpc.on('bd-openCssEditor', o => CSSEditor.openEditor(o));
+        BDIpc.on('bd-setCss', o => CSSEditor.setCSS(o.args));
 
         BDIpc.on('bd-readFile', this.readFile);
         BDIpc.on('bd-readJson', o => this.readFile(o, true));
@@ -106,6 +105,7 @@ class BetterDiscord {
             this.windowUtils.send('did-navigate-in-page', { event, url, isMainFrame });
         });
 
+        BDIpc.on('bd-sendToDiscord', event => this.windowUtils.send(event.args.channel, event.args.message))
 
         setTimeout(() => {
             if (__DEV) { this.injectScripts(); }

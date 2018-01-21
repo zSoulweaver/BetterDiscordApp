@@ -10,6 +10,7 @@
 
 const { Module } = require('./modulebase');
 const { BDIpc } = require('./bdipc');
+const $ = require('jquery');
 
 class CssEditor extends Module {
 
@@ -17,11 +18,15 @@ class CssEditor extends Module {
         this.state = {
             css: ''
         }
+        this.customcss = $('<style id="customcss">').appendTo("head");
         window.cssEditor = this;
+
+        BDIpc.on("bd-update-css", (_, css) => this.customcss.text(css));
+        BDIpc.on("bd-save-css", (_, css) => this.setState({css}));
     }
 
     show() {
-        BDIpc.send('openCssEditor', {});
+        BDIpc.send('openCssEditor', {}).then(() => BDIpc.send('setCss', {css: this.state.css}));
     }
 }
 

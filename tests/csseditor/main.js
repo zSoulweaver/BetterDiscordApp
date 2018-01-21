@@ -1,9 +1,15 @@
 const { remote, ipcRenderer } = require('electron');
+const { BDIpc } = require('../frontend/main.js');
 
 //Options
 const options = {
-    alwaysOnTop: false
+    alwaysOnTop: false,
+    liveUpdate: false
 };
+
+function sendToDiscord(channel, message) {
+    BDIpc.send('bd-sendToDiscord', {channel, message});
+}
 
 //Elements
 const
@@ -12,20 +18,32 @@ const
     $closeeditor = $('#closeeditor'),
     $editor = $('#editor'),
     $btnSave = $('#btnSave'),
-    $btnUpdate = $('#btnUpdate');
+    $btnUpdate = $('#btnUpdate'),
+    $chkboxLiveUpdate = $("#chkboxLiveUpdate input");
 
+$toggleaot.on('click', e => {
+    $toggleaot.toggleClass("active");
+    remote.getCurrentWindow().setAlwaysOnTop(options.alwaysOnTop = !options.alwaysOnTop);
+});
 $closeeditor.on('click', e => window.close());
 
-ipcRenderer.on('set-css', (_, data) => {
+$btnSave.on('click', () => sendToDiscord("save-css", codeMirror.getValue()));
+$btnUpdate.on('click', () => sendToDiscord("update-css", codeMirror.getValue()));
+$chkboxLiveUpdate.on('click', () => options.liveUpdate = $chkboxLiveUpdate[0].checked);
+
+BDIpc.on("set-css", (_, data) => {
     if (data.error) {
         alert(data.error);
         return;
     }
-    setCss(data);
+    
+    setCss(data.css);
     $spinner.hide();
 });
 
-function setCss(css) {}
+function setCss(css) {
+    codeMirror.setValue(css);
+}
 
 function alert(message) {}
 
@@ -45,6 +63,11 @@ const codeMirror = CodeMirror($editor[0], {
     scrollbarStyle: 'overlay',
     extraKeys: { 'Ctrl-Space': 'autocomplete' },
     dialog: { 'position': 'bottom' }
+});
+
+codeMirror.on('change', () => {
+    if (options.liveUpdate) 
+        sendToDiscord("update-css", codeMirror.getValue());
 });
 
 codeMirror.on('keyup', function (editor, event) {

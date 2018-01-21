@@ -43,3 +43,18 @@
         }
     }
 </script>
+
+<style>
+    .bd-spinner-container {
+        display: flex;
+        flex-grow: 1;
+        align-items: center;
+        align-content: center;
+        justify-content: center;
+    }
+
+        .bd-spinner-container .bd-spinner-2 {
+            width: 200px;
+            height: 200px;
+        }
+</style>

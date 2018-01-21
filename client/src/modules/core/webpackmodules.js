@@ -32,8 +32,8 @@ const KnownModules = {
     ChannelActions: Filters.byProperties(["selectChannel"]),
 
     /* Current User Info, State and Settings */
-    CurrentUserInfo: Filters.byProperties(["getToken"]),
-    CurrentUserState: Filters.byProperties(["guildPositions"]),
+    UserInfoStore: Filters.byProperties(["getToken"]),
+    UserSettingsStore: Filters.byProperties(["guildPositions"]),
     AccountManager: Filters.byProperties(['register', 'login']),
     UserSettingsUpdater: Filters.byProperties(['updateRemoteSettings']),
     OnlineWatcher: Filters.byProperties(['isOnline']),
@@ -169,31 +169,31 @@ const Cache = {};
 class WebpackModules {
 
     /* Synchronous */
-    static getModuleByNameSync(name, fallback) {
+    static getModuleByName(name, fallback) {
         if (Cache.hasOwnProperty(name)) return Cache[name];
         if (KnownModules.hasOwnProperty(name)) fallback = KnownModules[name];
         if (!fallback) return null;
-        return Cache[name] = this.getModuleSync(fallback, true);
+        return Cache[name] = this.getModule(fallback, true);
     }
 
-    static getModuleByDisplayNameSync(name) {
-        return this.getModuleSync(Filters.byDisplayName(name), true);
+    static getModuleByDisplayName(name) {
+        return this.getModule(Filters.byDisplayName(name), true);
     }
 
-    static getModuleByRegexSync(regex, first = true) {
-        return this.getModuleSync(Filters.byCode(regex), first);
+    static getModuleByRegex(regex, first = true) {
+        return this.getModule(Filters.byCode(regex), first);
     }
 
-    static getModuleByPrototypesSync(prototypes, first = true) {
-        return this.getModuleSync(Filters.byPrototypeFields(prototypes), first);
+    static getModuleByPrototypes(prototypes, first = true) {
+        return this.getModule(Filters.byPrototypeFields(prototypes), first);
     }
 
-    static getModuleByPropsSync(props, first = true) {
-        return this.getModuleSync(Filters.byProperties(props), first);
+    static getModuleByProps(props, first = true) {
+        return this.getModule(Filters.byProperties(props), first);
     }
 
-    static getModuleSync(filter, first = true) {
-        const modules = this.getAllModulesSync();
+    static getModule(filter, first = true) {
+        const modules = this.getAllModules();
         const rm = [];
         for (let index in modules) {
             if (!modules.hasOwnProperty(index)) continue;
@@ -208,11 +208,11 @@ class WebpackModules {
             if (first) return foundModule;
             rm.push(foundModule);
         }
-        return rm;
+        return first || rm.length == 0 ? null : rm;
     }
 
-    static getAllModulesSync() {
-        const id = 'bd-webpackmodulessync';
+    static getAllModules() {
+        const id = 'bd-webpackmodules';
         const __webpack_require__ = window['webpackJsonp'](
             [],
             {
@@ -223,67 +223,6 @@ class WebpackModules {
         delete __webpack_require__.c[id];
         return __webpack_require__.c;
     }
-
-    /* Asynchronous */
-    static async getModuleByName(name, first = true, fallback) {
-        if (Cache.hasOwnProperty(name)) return Cache[name];
-        if (KnownModules.hasOwnProperty(name)) fallback = KnownModules[name];
-        if (!fallback) return null;
-        return Cache[name] = await this.getModule(fallback, first);
-    }
-
-    static async getModuleByDisplayNameSync(name) {
-        return await this.getModule(Filters.byDisplayName(name), true);
-    }
-
-    static async getModuleByRegexSync(regex, first = true) {
-        return await this.getModule(Filters.byCode(regex), first);
-    }
-
-    static async getModuleByPrototypes(prototypes, first = true) {
-        return await this.getModule(Filters.byPrototypeFields(prototypes), first);
-    }
-
-    static async getModuleByProps(props, first = true) {
-        return await this.getModule(Filters.byProperties(props), first);
-    }
-
-    static async getModule(filter, first = true) {
-        const modules = await this.getAllModules();
-        const rm = [];
-        for (let index in modules) {
-            if (!modules.hasOwnProperty(index)) continue;
-            const module = modules[index];
-            const { exports } = module;
-            let foundModule = null;
-
-            if (!exports) continue;
-            if (exports.__esModule && exports.default && filter(exports.default)) foundModule = exports.default;
-            if (filter(exports)) foundModule = exports;
-            if (!foundModule) continue;
-            if (first) return foundModule;
-            rm.push(foundModule);
-        }
-        return rm;
-    }
-
-    static async getAllModules() {
-        return new Promise(resolve => {
-            const id = 'bd-webpackmodules';
-            window['webpackJsonp'](
-                [],
-                {
-                    [id]: (module, exports, __webpack_require__) => {
-                        delete __webpack_require__.c[id];
-                        delete __webpack_require__.m[id];
-                        resolve(__webpack_require__.c);
-                    }
-                },
-                [id]
-            );
-        });
-    }
-
 }
 
 module.exports = { WebpackModules };

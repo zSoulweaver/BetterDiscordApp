@@ -42,7 +42,7 @@ if (window.BetterDiscord) {
         'vendor': {
             jQuery: require('jquery'),
             $: require('jquery'),
-            moment: window.wpm.getModuleByNameSync('Moment')
+            moment: WebpackModules.getModuleByName('Moment')
         }
     };
 }

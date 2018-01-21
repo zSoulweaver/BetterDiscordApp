@@ -22,5 +22,8 @@
     "gulp": "^3.9.1",
     "gulp-babel": "^7.0.0",
     "pump": "^2.0.0"
+  },
+  "scripts": {
+    "gulp": "gulp"
   }
 }

@@ -11,7 +11,7 @@
 'use strict';
 
 const styles = require('./styles/index.scss');
-const { Global, Logger, Utils, PluginManager, BDIpc, WebpackModules, SocketProxy, Events, CssEditor } = require('./modules');
+const { Global, Logger, Utils, PluginManager, BDIpc, WebpackModules, SocketProxy, Events } = require('./modules');
 //const { UI } = require('./modules/ui/index.jsx');
 
 class BetterDiscord {
@@ -19,7 +19,6 @@ class BetterDiscord {
     constructor() {
         window.bdUtils = Utils;
         window.wpm = WebpackModules;
-        window.cssEditor = CssEditor;
         Events.on('global-ready', e => {
             const { UI } = require('./modules/ui/vueui.js');
             this.ui = new UI();

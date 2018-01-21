@@ -21,9 +21,12 @@
     "electron": "^1.7.10",
     "gulp": "^3.9.1",
     "gulp-babel": "^7.0.0",
-    "pump": "^2.0.0"
+    "pump": "^2.0.0",
+    "gulp-plumber": "^1.2.0",
+    "gulp-watch": "^5.0.0"
   },
   "scripts": {
-    "gulp": "gulp"
+    "build": "gulp build",
+    "watch": "gulp watch" 
   }
 }

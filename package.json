@@ -1,0 +1,24 @@
+{
+  "name": "betterdiscord",
+  "description": "BetterDiscord",
+  "author": "Jiiks",
+  "version": "0.4.0",
+  "homepage": "https://betterdiscord.net",
+  "license": "MIT",
+  "main": "index.js",
+  "contributors": [
+    "Jiiks",
+    "Pohky"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jiiks/BetterDiscordApp.git"
+  },
+  "private": false,
+  "devDependencies": {},
+  "scripts": {
+    "build": "cd ./client && npm run build && cd ../core && npm run build",
+    "watch_client": "cd ./client && npm run watch",
+    "watch_core": "cd ./core && npm run watch"
+  }
+}

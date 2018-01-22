@@ -15,7 +15,7 @@
 
     /*Methods*/
     function settingOnClick() {
-
+        console.log("setting on click");
     }
 
     const methods = { settingOnClick };

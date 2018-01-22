@@ -1,8 +1,22 @@
 [
     {
         "id": "core",
-        "text": "Core", 
+        "text": "Core",
         "settings": [
+            {
+                "id": "test-setting",
+                "text": "Test Setting",
+                "hint": "Test Setting",
+                "enabled": false,
+                "disabled": false
+            },
+            {
+                "id": "test-setting2",
+                "text": "Test Setting 2",
+                "hint": "Test Setting 2",
+                "enabled": true,
+                "disabled": false
+            },
             {
                 "id": "voice-disconnect",
                 "text": "Voice Disconnect",

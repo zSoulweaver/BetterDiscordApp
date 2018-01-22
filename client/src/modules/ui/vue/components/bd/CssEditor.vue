@@ -5,14 +5,28 @@
 
     /*Imports*/
     import { SettingsWrapper } from './';
-    const components = { SettingsWrapper };
+    import { SettingSwitch } from '../generic';
+    const components = { SettingsWrapper, SettingSwitch };
 
     function openInternalEditor() {
         CssEditor.show();
     }
 
+    function settingClicked() {
+        this.dummySetting.checked = !this.dummySetting.checked;
+    }
+
     export default {
         components,
-        methods: { openInternalEditor }
+        methods: { openInternalEditor, settingClicked },
+        data() {
+            return {
+                dummySetting: {
+                    title: "Live Update",
+                    hint: "Automatically update client css when saved.",
+                    checked: true
+                }
+            }
+        }
     }
 </script>

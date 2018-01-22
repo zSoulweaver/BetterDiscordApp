@@ -27,7 +27,6 @@ class CSSEditor extends Module {
 
         this.editor = new BrowserWindow(this.options);
         this.editor.loadURL(`file://${this.editorPath}/index.html`);
-        this.editor.webContents.toggleDevTools();
         this.editor.open = true;
         this.editor.setSheetOffset(33);
 

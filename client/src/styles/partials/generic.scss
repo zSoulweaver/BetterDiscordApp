@@ -95,6 +95,10 @@
     margin: 0;
     align-self: flex-end;
     background: #C42929;
+
+    &:hover {
+        background: lighten(#C42929, 2%);
+    }
 }
 
 .bd-form-button {
@@ -107,4 +111,8 @@
     border-radius: 4px;
     margin-top: 10px;
     cursor: pointer;
+
+    &:hover {
+        background: lighten(#3e82e5, 5%);
+    }
 }

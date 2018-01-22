@@ -52,7 +52,21 @@
         return item.id === this.activeIndex;
     }
 
-    const methods = { itemOnClick, animatingContent, activeContent };
+    function enableSetting(cat, id) {
+        switch (cat) {
+            case 'core':
+                return this.coreSettings.find(setting => setting.id === id).enabled = true;
+        }
+    }
+
+    function disableSetting(cat, id) {
+        switch (cat) {
+            case 'core':
+                return this.coreSettings.find(setting => setting.id === id).enabled = false;
+        }
+    }
+
+    const methods = { itemOnClick, animatingContent, activeContent, enableSetting, disableSetting };
 
     export default {
         components,
@@ -64,12 +78,13 @@
                 activeIndex: -1,
                 lastActiveIndex: -1,
                 animating: false,
-                first: true
+                first: true,
+                settings: Settings.getSettings
             }
         },
         computed: {
             coreSettings: function () {
-                return (Settings.getSettings.find(settingset => settingset.id === 'core')).settings;
+                return this.settings.find(settingset => settingset.id === 'core').settings;
             }
         },
         updated: function () {

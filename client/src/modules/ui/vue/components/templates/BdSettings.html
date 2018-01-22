@@ -9,7 +9,7 @@
         </Sidebar>
         <ContentColumn slot="content">
             <div :class="{active: activeContent('core'), animating: animatingContent('core')}">
-                <CoreSettings :settings="coreSettings"/>
+                <CoreSettings :settings="coreSettings" :enableSetting="enableSetting" :disableSetting="disableSetting"/>
             </div>
             <div :class="{active: activeContent('ui'), animating: animatingContent('ui')}">
                 <UISettings />

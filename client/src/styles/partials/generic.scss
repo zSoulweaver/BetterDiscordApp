@@ -218,3 +218,13 @@
 .bd-setting-switch + .bd-form-divider {
     margin: 0 0 10px 0;
 }
+
+.bd-seting-switch.bd-disabled {
+
+    input {
+        cursor: not-allowed;
+    }
+    .bd-switch:before {
+        background: #888888;
+    }
+}

@@ -1,7 +1,7 @@
 <template>
     <SettingsWrapper headertext="Core Settings">
         <div class="bd-form-item"  v-for="setting in settings" :key="setting.id">
-            <SettingSwitch key="setting.id" :setting="setting" :onClick="settingOnClick"/>
+            <SettingSwitch key="setting.id" :setting="setting" :onClick="settingOnClick" :disabled="setting.disabled"/>
             <div class="bd-form-divider"/>
          </div>
     </SettingsWrapper>

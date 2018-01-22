@@ -25,7 +25,7 @@
         <div class="tools">
             <div class="flex-row">
                 <button @click="save">Save</button>
-                <button>Update</button>
+                <button @click="update">Update</button>
                 <div class="flex-spacer"></div>
                 <div id="chkboxLiveUpdate">
                     <input type="checkbox" @click="toggleLiveUpdate" :checked="liveUpdate"><span>Live Update</span>
@@ -105,7 +105,13 @@
 
     /*Methods*/
     function save() {
-        
+        const css = this.codemirror.getValue();
+        sendToDiscord('save-css', css);
+    }
+
+    function update() {
+        const css = this.codemirror.getValue();
+        sendToDiscord('update-css', css);
     }
 
     function toggleaot() {
@@ -119,7 +125,7 @@
 
     function setCss(css) {
         this.loading = false;
-        this.codemirror.setValue(css);
+        this.codemirror.setValue(css || '');
     }
 
     function cmOnChange(value) {
@@ -136,7 +142,7 @@
         this.liveUpdate = !this.liveUpdate;
     }
 
-    const methods = { save, toggleaot, close, setCss, cmOnChange, cmOnKeyUp, toggleLiveUpdate };
+    const methods = { save, update, toggleaot, close, setCss, cmOnChange, cmOnKeyUp, toggleLiveUpdate };
 
     export default {
         methods,
@@ -172,12 +178,12 @@
         },
         mounted: function () {
             this.codemirror.on('keyup', this.cmOnKeyUp);
-            this.setCss();
             BDIpc.on('set-css', (_, data) => {
                 if (data.error) {
                     console.log(data.error);
                     return;
                 }
+                console.log(data);
                 this.setCss(data.css);
             });
 

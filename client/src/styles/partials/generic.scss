@@ -50,6 +50,11 @@
     }
 }
 
+.bd-content-region,
+.bd-content-region .bd-content-column {
+    backface-visibility: hidden;
+}
+
 .bd-button {
     cursor: pointer;
     color: #b9bbbe;

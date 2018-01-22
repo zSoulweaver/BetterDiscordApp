@@ -14,8 +14,7 @@
     const components = { SettingsWrapper, SettingSwitch };
 
     /*Methods*/
-    function settingOnClick() {
-        console.log("setting on click");
+    function settingOnClick(setting) {
     }
 
     const methods = { settingOnClick };

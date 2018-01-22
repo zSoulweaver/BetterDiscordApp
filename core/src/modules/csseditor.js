@@ -16,9 +16,9 @@ const { Module } = require('./modulebase');
 class CSSEditor extends Module {
 
     openEditor(o) {
-        if (this.editor && this.editor.isFocused()) return;
+        if (this.editor) {
+            if (this.editor.isFocused()) return;
 
-        if (this.editor && this.editor.open) {
             this.editor.focus();
             this.editor.flashFrame(true);
             o.reply(true);
@@ -31,7 +31,7 @@ class CSSEditor extends Module {
         this.editor.setSheetOffset(33);
 
         this.editor.webContents.on('close', () => {
-            this.editor.open = false;
+            this.editor = null;
         });
 
         this.editor.webContents.on('did-finish-load', () => {

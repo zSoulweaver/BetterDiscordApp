@@ -8,7 +8,7 @@
             <div class="title">CSS Editor</div>
             <div class="flex-spacer"></div>
             <div class="controls">
-                <button title="Toggle always on top" @click="toggleaot">P</button>
+                <button :class="{active: alwaysOnTop}"ref="aot" title="Toggle always on top" @click="toggleaot">P</button>
                 <button title="Close CSS Editor" @click="close">X</button>
             </div>
         </div>
@@ -28,7 +28,7 @@
                 <button>Update</button>
                 <div class="flex-spacer"></div>
                 <div id="chkboxLiveUpdate">
-                    <input type="checkbox"><span>Live Update</span>
+                    <input type="checkbox" @click="toggleLiveUpdate" :checked="liveUpdate"><span>Live Update</span>
                 </div>
             </div>
         </div>
@@ -44,6 +44,12 @@
     import '../../node_modules/codemirror/addon/search/jump-to-line.js';
     import '../../node_modules/codemirror/addon/dialog/dialog.js';
     import '../../node_modules/codemirror/addon/hint/show-hint.js';
+
+    const { remote } = window.require('electron');
+    const { BDIpc } = require('./bdipc');
+    function sendToDiscord(channel, message) {
+        BDIpc.send('bd-sendToDiscord', { channel, message });
+    }
 
     const ExcludedIntelliSenseTriggerKeys = {
         '8': 'backspace',
@@ -103,7 +109,8 @@
     }
 
     function toggleaot() {
-        console.log(VueCodemirror);
+        this.alwaysOnTop = !this.alwaysOnTop;
+        remote.getCurrentWindow().setAlwaysOnTop(this.alwaysOnTop);
     }
 
     function close() {
@@ -112,10 +119,11 @@
 
     function setCss(css) {
         this.loading = false;
-        this.codemirror.setValue("body { background: red; }");
+        this.codemirror.setValue(css);
     }
 
     function cmOnChange(value) {
+        if(this.liveUpdate) sendToDiscord('update-css', value);
     }
 
     function cmOnKeyUp(editor, event) {
@@ -124,7 +132,11 @@
         cmCommands.autocomplete(editor, null, { completeSingle: false });
     }
 
-    const methods = { save, toggleaot, close, setCss, cmOnChange, cmOnKeyUp };
+    function toggleLiveUpdate(e) {
+        this.liveUpdate = !this.liveUpdate;
+    }
+
+    const methods = { save, toggleaot, close, setCss, cmOnChange, cmOnKeyUp, toggleLiveUpdate };
 
     export default {
         methods,
@@ -132,13 +144,21 @@
             return {
                 loading: true,
                 codeMirror: null,
+                alwaysOnTop: false,
+                liveUpdate: false,
                 cmOptions: {
                     indentUnit: 4,
                     tabSize: 4,
                     mode: 'css',
                     lineNumbers: true,
                     theme: 'material',
-                    scrollbarStyle: 'overlay'
+                    scrollbarStyle: 'overlay',
+                    extraKeys: {
+                        'Ctrl-Space': 'autocomplete'
+                    },
+                    dialog: {
+                        'position': 'bottom'
+                    }
                 }
             }
         },
@@ -153,7 +173,7 @@
         mounted: function () {
             this.codemirror.on('keyup', this.cmOnKeyUp);
             this.setCss();
-           /* BDIpc.on('set-css', (_, data) => {
+            BDIpc.on('set-css', (_, data) => {
                 if (data.error) {
                     console.log(data.error);
                     return;
@@ -161,7 +181,7 @@
                 this.setCss(data.css);
             });
 
-            BDIpc.send('get-css');*/
+            BDIpc.send('get-css');
         }
     }
 </script>

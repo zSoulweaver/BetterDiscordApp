@@ -1,4 +1,4 @@
-<div class="bd-setting-switch">
+<div class="bd-setting-switch" :class="{'bd-disabled': disabled}">
   <div class="bd-title">
       <h3>{{setting.title || setting.text}}</h3>
       <label class="bd-switch-wrapper" @click="onClick">

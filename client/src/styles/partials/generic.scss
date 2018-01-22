@@ -58,3 +58,53 @@
     -webkit-user-select: none;
     user-select: none;
 }
+
+.bd-form-item h5 {
+    color: #b9bbbe;
+    text-transform: uppercase;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.bd-form-divider {
+    height: 1px;
+    margin-top: 8px;
+    margin-bottom: 40px;
+    background: hsla(218,5%,47%,.3);
+}
+
+.bd-form-warning {
+    display: flex;
+    margin-top: 20px;
+    background: #d84040;
+    border: 1px solid #B30B0B;
+    opacity: .8;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+.bd-form-warning .bd-text {
+    display: flex;
+    color: #FFF;
+    font-weight: 700;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.bd-form-warning .bd-form-button {
+    margin: 0;
+    align-self: flex-end;
+    background: #C42929;
+}
+
+.bd-form-button {
+    background: #3e82e5;
+    width: 100px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    color: #FFF;
+    border-radius: 4px;
+    margin-top: 10px;
+    cursor: pointer;
+}

@@ -46,7 +46,7 @@
     import '../../node_modules/codemirror/addon/hint/show-hint.js';
 
     const { remote } = window.require('electron');
-    const { BDIpc } = require('./bdipc');
+    const { BDIpc } = require('./BDIpc');
     function sendToDiscord(channel, message) {
         BDIpc.send('bd-sendToDiscord', { channel, message });
     }

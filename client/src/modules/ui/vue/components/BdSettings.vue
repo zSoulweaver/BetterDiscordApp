@@ -1,7 +1,9 @@
 <template src="./templates/BdSettings.html"></template>
 
 <script>
-    
+
+    const { Settings } = require('../../../');
+
     /*Imports*/
     import { SidebarView, Sidebar, SidebarItem, ContentColumn } from './sidebar';
     import { CoreSettings, UISettings, EmoteSettings, PluginsView, CssEditorView } from './bd';
@@ -63,6 +65,11 @@
                 lastActiveIndex: -1,
                 animating: false,
                 first: true
+            }
+        },
+        computed: {
+            coreSettings: function () {
+                return (Settings.getSettings.find(settingset => settingset.id === 'core')).settings;
             }
         },
         updated: function () {

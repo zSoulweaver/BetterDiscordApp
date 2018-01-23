@@ -28,7 +28,12 @@
         this.local = false;
     }
 
-    const methods = { showLocal, showOnline, refreshLocalPlugins };
+    function togglePlugin(plugin) {
+        if (plugin.enabled) return PluginManager.stopPlugin(plugin.name);
+        PluginManager.startPlugin(plugin.name);
+    }
+
+    const methods = { showLocal, showOnline, refreshLocalPlugins, togglePlugin };
 
     export default {
         components,

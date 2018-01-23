@@ -17,6 +17,7 @@ class Plugin {
 
     constructor(pluginInternals) {
         this.__pluginInternals = pluginInternals;
+        this.userConfig.enabled = this.userConfig.enabled || false;
         this.start = this.start.bind(this);
         this.stop = this.stop.bind(this);
     }
@@ -42,7 +43,7 @@ class Plugin {
             }
             return false;
         }
-        return true; //Assume plugin started since it doesn't have onStart
+        return this.userConfig.enabled = true; //Assume plugin started since it doesn't have onStart
     }
 
     stop() {
@@ -54,6 +55,7 @@ class Plugin {
             }
             return false;
         }
+        this.userConfig.enabled = false;
         return true; //Assume plugin stopped since it doesn't have onStop
     }
 

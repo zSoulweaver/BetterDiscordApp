@@ -17,7 +17,6 @@
         } catch (err) {
             
         }
-        this.localPlugins = PluginManager.plugins;
     }
 
     function showLocal() {
@@ -29,8 +28,11 @@
     }
 
     function togglePlugin(plugin) {
-        if (plugin.enabled) return PluginManager.stopPlugin(plugin.name);
-        PluginManager.startPlugin(plugin.name);
+       if (plugin.enabled) {
+            this.pluginManager.stopPlugin(plugin.name);
+        } else {
+            this.pluginManager.startPlugin(plugin.name);
+        }
     }
 
     const methods = { showLocal, showOnline, refreshLocalPlugins, togglePlugin };
@@ -39,8 +41,13 @@
         components,
         data() {
             return {
-                localPlugins: [],
-                local: true
+                local: true,
+                pluginManager: PluginManager
+            }
+        },
+        computed: {
+            localPlugins: function () {
+                return this.pluginManager.plugins;
             }
         },
         methods,

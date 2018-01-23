@@ -167,7 +167,7 @@
     display: block;
 }
 
-.bd-setting-switch .bd-switch-wrapper input {
+.bd-switch-wrapper input {
     position: absolute;
     opacity: 0;
     cursor: pointer;
@@ -176,7 +176,7 @@
     z-index: 1;
 }
 
-.bd-setting-switch .bd-switch-wrapper .bd-switch {
+.bd-switch-wrapper .bd-switch {
     position: absolute;
     top: 0;
     right: 0;
@@ -206,7 +206,7 @@
     border-bottom: 0px solid hsla(218,5%,47%,.1);
 }
 
-.bd-setting-switch .bd-switch-wrapper .bd-switch:before {
+.bd-switch-wrapper .bd-switch:before {
     content: "";
     display: block;
     width: 18px;
@@ -221,11 +221,11 @@
     box-shadow: 0 3px 1px 0 rgba(0,0,0,.05), 0 2px 2px 0 rgba(0,0,0,.1), 0 3px 3px 0 rgba(0,0,0,.05);
 }
 
-.bd-setting-switch .bd-switch-wrapper .bd-switch.bd-checked {
+.bd-switch-wrapper .bd-switch.bd-checked {
     background: $colbdblue;
 }
 
-.bd-setting-switch .bd-switch-wrapper .bd-switch.bd-checked:before {
+.bd-switch-wrapper .bd-switch.bd-checked:before {
     transform: translateX(20px);
 }
 

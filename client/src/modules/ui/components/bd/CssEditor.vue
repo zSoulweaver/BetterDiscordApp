@@ -1,7 +1,7 @@
 <template src="./templates/CssEditor.html"></template>
 
 <script>
-    const { CssEditor } = require('../../../../');
+    const { CssEditor } = require('../../../');
 
     /*Imports*/
     import { SettingsWrapper } from './';

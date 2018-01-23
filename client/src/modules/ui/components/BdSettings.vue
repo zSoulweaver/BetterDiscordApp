@@ -2,7 +2,7 @@
 
 <script>
 
-    const { Settings } = require('../../../');
+    const { Settings } = require('../../');
 
     /*Imports*/
     import { SidebarView, Sidebar, SidebarItem, ContentColumn } from './sidebar';

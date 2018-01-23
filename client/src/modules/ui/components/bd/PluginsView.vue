@@ -1,6 +1,6 @@
 <template src="./templates/PluginsView.html"></template>
 <script>
-    const { PluginManager } = require('../../../../'); //#1 require of 2018~ :3
+    const { PluginManager } = require('../../../'); //#1 require of 2018~ :3
 
     /*Imports*/
     import { SettingsWrapper } from './';

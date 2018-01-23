@@ -5,8 +5,8 @@
 
     /*Imports*/
     import { SettingsWrapper } from './';
-    import { SettingSwitch } from '../generic';
-    const components = { SettingsWrapper, SettingSwitch };
+    import { SettingSwitch, FormButton } from '../generic';
+    const components = { SettingsWrapper, SettingSwitch, FormButton };
 
     function openInternalEditor() {
         CssEditor.show();
